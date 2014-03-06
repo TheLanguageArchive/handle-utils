@@ -1,0 +1,19 @@
+Copyright (C) 2014, The Max Planck Institute for Psycholinguistics.
+
+This file is part of LAMUS 2 (Language Archive Management and Upload System).
+
+Handle Utils is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+Handle Utils is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Handle Utils (LICENCE-gpl-3.0.txt). If not, see <http://www.gnu.org/licenses/>.
+
+Handle Utils uses a class (HandleUtil.java), with some small changes, developed by CNRI,
+which is licensed as open source under the Joint ADL Co-Lab Open Source Software License
+(http://adlregistry.adlnet.gov/source_license.html).
