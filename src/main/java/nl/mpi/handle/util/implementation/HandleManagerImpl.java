@@ -109,4 +109,24 @@ public class HandleManagerImpl implements HandleManager {
         
         return new URI(generatedHandle);
     }
+
+    /**
+     * @see HandleManager#updateHandle(java.io.File, java.net.URI, java.net.URI)
+     */
+    @Override
+    public void updateHandle(File file, URI handle, URI newTarget) throws HandleException, IOException {
+        
+        HandleValue[] handleInformation = handleInfoRetriever.createHandleInformation(file, newTarget);
+        
+        handleUtil.updateHandleValue(handle.toString(), handleInformation);
+    }
+
+    /**
+     * @see HandleManager#deleteHandle(java.net.URI)
+     */
+    @Override
+    public void deleteHandle(URI handle) throws HandleException, IOException {
+        
+        handleUtil.deleteHandle(handle.toString());
+    }
 }

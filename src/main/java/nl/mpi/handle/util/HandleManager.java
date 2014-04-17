@@ -55,4 +55,18 @@ public interface HandleManager {
      * @return URI corresponding to the handle, with the appropriate prefix
      */
     public URI assignNewHandle(File file, URI targetURI) throws HandleException, IOException, URISyntaxException;
+    
+    /**
+     * Updates the target of the given handle.
+     * @param current location of the file to which the handle should be updated
+     * @param handle handle to update, as a URI
+     * @param newTarget new target to which the handle should point
+     */
+    public void updateHandle(File file, URI handle, URI newTarget) throws HandleException, IOException;
+    
+    /**
+     * Deletes the given handle
+     * @param handle handle to be deleted
+     */
+    public void deleteHandle(URI handle) throws HandleException, IOException;
 }

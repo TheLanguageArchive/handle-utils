@@ -353,4 +353,140 @@ public class HandleManagerImplTest {
             assertNotNull("Something", ex);
         }
     }
+    
+    @Test
+    public void updateHandle() throws URISyntaxException, FileNotFoundException, IOException, HandleException {
+        
+        final UUID handleUUID = UUID.randomUUID();
+        final String handleUUIDStr = handleUUID.toString().toUpperCase();
+        final String handleStr = prefix + "/00-" + handleUUIDStr;
+        final URI handle = new URI(handleStr);
+        final URI newTarget = new URI("http://server/archive/target,cmdi");
+        
+        final HandleValue[] fakeHandleValues = {new HandleValue()};
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleInfoRetriever).createHandleInformation(mockFile, newTarget); will(returnValue(fakeHandleValues));
+            oneOf(mockHandleUtil).updateHandleValue(handleStr, fakeHandleValues);
+        }});
+        
+        handleManager.updateHandle(mockFile, handle, newTarget);
+    }
+    
+    @Test
+    public void updateHandleThrowsHandleException() throws URISyntaxException, FileNotFoundException, IOException, HandleException {
+        
+        final UUID handleUUID = UUID.randomUUID();
+        final String handleUUIDStr = handleUUID.toString().toUpperCase();
+        final String handleStr = prefix + "/00-" + handleUUIDStr;
+        final URI handle = new URI(handleStr);
+        final URI newTarget = new URI("http://server/archive/target,cmdi");
+        
+        final HandleValue[] fakeHandleValues = {new HandleValue()};
+        
+        final HandleException expectedException = new HandleException(1, "some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleInfoRetriever).createHandleInformation(mockFile, newTarget); will(returnValue(fakeHandleValues));
+            oneOf(mockHandleUtil).updateHandleValue(handleStr, fakeHandleValues); will(throwException(expectedException));
+        }});
+        
+        try {
+            handleManager.updateHandle(mockFile, handle, newTarget);
+            fail("should have thrown exception");
+        } catch(HandleException ex) {
+            assertEquals("Exception different from exception", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void updateHandleThrowsIOException() throws URISyntaxException, FileNotFoundException, IOException, HandleException {
+        
+        final UUID handleUUID = UUID.randomUUID();
+        final String handleUUIDStr = handleUUID.toString().toUpperCase();
+        final String handleStr = prefix + "/00-" + handleUUIDStr;
+        final URI handle = new URI(handleStr);
+        final URI newTarget = new URI("http://server/archive/target,cmdi");
+        
+        final IOException expectedException = new IOException("some exception message");
+        
+        final HandleValue[] fakeHandleValues = {new HandleValue()};
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleInfoRetriever).createHandleInformation(mockFile, newTarget); will(returnValue(fakeHandleValues));
+            oneOf(mockHandleUtil).updateHandleValue(handleStr, fakeHandleValues); will(throwException(expectedException));
+        }});
+        
+        try {
+            handleManager.updateHandle(mockFile, handle, newTarget);
+            fail("should have thrown exception");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void deleteHandle() throws URISyntaxException, FileNotFoundException, IOException, HandleException {
+        
+        final UUID handleUUID = UUID.randomUUID();
+        final String handleUUIDStr = handleUUID.toString().toUpperCase();
+        final String handleStr = prefix + "/00-" + handleUUIDStr;
+        final URI handle = new URI(handleStr);
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleUtil).deleteHandle(handleStr);
+        }});
+        
+        handleManager.deleteHandle(handle);
+    }
+    
+    @Test
+    public void deleteHandleThrowsHandleException() throws URISyntaxException, FileNotFoundException, IOException, HandleException {
+        
+        final UUID handleUUID = UUID.randomUUID();
+        final String handleUUIDStr = handleUUID.toString().toUpperCase();
+        final String handleStr = prefix + "/00-" + handleUUIDStr;
+        final URI handle = new URI(handleStr);
+        
+        final HandleException expectedException = new HandleException(1, "some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleUtil).deleteHandle(handleStr); will(throwException(expectedException));
+        }});
+        
+        try {
+            handleManager.deleteHandle(handle);
+            fail("should have thrown exception");
+        } catch(HandleException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void deleteHandleThrowsIOException() throws URISyntaxException, FileNotFoundException, IOException, HandleException {
+        
+        final UUID handleUUID = UUID.randomUUID();
+        final String handleUUIDStr = handleUUID.toString().toUpperCase();
+        final String handleStr = prefix + "/00-" + handleUUIDStr;
+        final URI handle = new URI(handleStr);
+        
+        final IOException expectedException = new IOException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleUtil).deleteHandle(handleStr); will(throwException(expectedException));
+        }});
+        
+        try {
+            handleManager.deleteHandle(handle);
+            fail("should have thrown exception");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
 }
