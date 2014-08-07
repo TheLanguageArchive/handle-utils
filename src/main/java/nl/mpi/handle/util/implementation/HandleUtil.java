@@ -291,18 +291,13 @@ public class HandleUtil
         
         byte[] fileBytes = null;
         
-        InputStream privKeyInputStream = HandleUtil.class.getClassLoader().getResourceAsStream(handleAdminKeyFilePath);
+//        InputStream privKeyInputStream = HandleUtil.class.getClassLoader().getResourceAsStream(handleAdminKeyFilePath);
+        
+        // now using an absolute path
+        InputStream privKeyInputStream = new FileInputStream(handleAdminKeyFilePath);
 
-        if(privKeyInputStream != null) {
-            
-            fileBytes = IOUtils.toByteArray(privKeyInputStream);
-            privKeyInputStream.close();
-            
-        }
-        else
-        {
-            throw new IOException("The private key file could not be opened.");
-        }
+        fileBytes = IOUtils.toByteArray(privKeyInputStream);
+        privKeyInputStream.close();
         
         return fileBytes;
     }
