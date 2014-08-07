@@ -43,7 +43,6 @@ public class HandleInfoRetrieverImpl implements HandleInfoRetriever {
     private static final Logger logger = LoggerFactory.getLogger(HandleInfoRetrieverImpl.class);
     
     private String prefix;
-    private String proxy;
     
     private String handlePrefix;
     private String altPrefix;
@@ -53,7 +52,6 @@ public class HandleInfoRetrieverImpl implements HandleInfoRetriever {
     public HandleInfoRetrieverImpl(String prefix, String proxy) {
         
         this.prefix = prefix;
-        this.proxy = proxy;
         
         this.justPrefix = prefix + "/";
         this.handlePrefix = proxy + justPrefix;
@@ -66,18 +64,24 @@ public class HandleInfoRetrieverImpl implements HandleInfoRetriever {
     @Override
     public String stripHandle(String handle) {
         
+        logger.debug("Stripping handle: {}", handle);
+        
+        String strippedHandle;
+        
         if(handle.startsWith(justPrefix)) {
-            return handle.replace(justPrefix, "");
-        }
-        if(handle.startsWith(handlePrefix)) {
-            return handle.replace(handlePrefix, "");
-        }
-        if(handle.startsWith(altPrefix)) {
-            return handle.replace(altPrefix, "");
+            strippedHandle = handle.replace(justPrefix, "");
+        } else if(handle.startsWith(handlePrefix)) {
+            strippedHandle = handle.replace(handlePrefix, "");
+        } else if(handle.startsWith(altPrefix)) {
+            strippedHandle = handle.replace(altPrefix, "");
+        } else {
+            //the handle should have a valid prefix
+            throw new IllegalArgumentException("Invalid handle prefix: " + handle);
         }
         
-        //the handle should have a valid prefix
-        throw new IllegalArgumentException("Invalid handle prefix: " + handle);
+        logger.debug("Stripped handle: {}", strippedHandle);
+        
+        return strippedHandle;
     }
     
     /**
@@ -85,6 +89,8 @@ public class HandleInfoRetrieverImpl implements HandleInfoRetriever {
      */
     @Override
     public HandleValue[] createHandleInformation(File file, URI uri) {
+        
+        logger.debug("Creating handle information; file: {}; uri: {}", file, uri);
         
         long currentTimeInMills = Calendar.getInstance().getTimeInMillis();
         
@@ -125,6 +131,9 @@ public class HandleInfoRetrieverImpl implements HandleInfoRetriever {
      */
     @Override
     public String generateUuidHandle() {
+        
+        logger.debug("Generating UUID for new handle");
+        
 	UUID uuid = UUID.randomUUID();
 	String randomUUIDString = uuid.toString().toUpperCase();
 	String pid = prefix + "/00-" + randomUUIDString;
@@ -136,6 +145,9 @@ public class HandleInfoRetrieverImpl implements HandleInfoRetriever {
      */
     @Override
     public boolean handleIsValidUuid(String handle) {
+        
+        logger.debug("Checking if handle '{}' is a valid UUID", handle);
+        
 	String uuid;
 	String testHandlePrefix = handlePrefix + "/00-";
 	String testAltPrefix = altPrefix + "/00-";
@@ -146,7 +158,7 @@ public class HandleInfoRetrieverImpl implements HandleInfoRetriever {
 		uuid = handle.replace(testAltPrefix, "");
 	    }
 	    logger.info("uuid : {}", uuid);
-	    UUID isUuid = UUID.fromString(uuid);
+	    UUID.fromString(uuid);
 	    return true;
 	} catch (IllegalArgumentException ex) {
 	    logger.error("uuid not valid", ex);

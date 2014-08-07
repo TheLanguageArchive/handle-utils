@@ -39,23 +39,15 @@ public class HandleManagerImpl implements HandleManager {
     private HandleInfoRetriever handleInfoRetriever;
     private HandleUtil handleUtil;
     
-    private String prefix;
-    private String proxy;
-    
     private String justPrefix;
-    private String handlePrefix;
     private String altPrefix;
     
-    public HandleManagerImpl(HandleInfoRetriever hdlInfoRetriever, HandleUtil hdlUtil, String prefix, String proxy) throws FileNotFoundException, IOException {
+    public HandleManagerImpl(HandleInfoRetriever hdlInfoRetriever, HandleUtil hdlUtil, String prefix) throws FileNotFoundException, IOException {
 
         this.handleInfoRetriever = hdlInfoRetriever;
         this.handleUtil = hdlUtil;
         
-        this.prefix = prefix;
-        this.proxy = proxy;
-        
         this.justPrefix = prefix + "/";
-        this.handlePrefix = proxy + justPrefix;
 	this.altPrefix = "hdl:" + justPrefix;
     }
     
@@ -64,6 +56,8 @@ public class HandleManagerImpl implements HandleManager {
      */
     @Override
     public boolean areHandlesEquivalent(URI aHandleUri, URI anotherHandleUri) {
+        
+        logger.debug("Checking if handles '{}' and '{}' are equivalent", aHandleUri, anotherHandleUri);
 
         String aHandle = null;
         String anotherHandle = null;
@@ -91,8 +85,13 @@ public class HandleManagerImpl implements HandleManager {
     @Override
     public URI prepareHandleWithHdlPrefix(URI handleToPrepare) throws URISyntaxException {
         
+        logger.debug("Preparing handle '{}' with hdl prefix", handleToPrepare);
+        
         String strippedHandle = handleInfoRetriever.stripHandle(handleToPrepare.toString());
-        return new URI(altPrefix + strippedHandle);
+        URI handleWithHdlPrefix = new URI(altPrefix + strippedHandle);
+        
+        logger.debug("Prepared handle: {}", handleWithHdlPrefix);
+        return handleWithHdlPrefix;
     }
     
     /**
@@ -101,13 +100,17 @@ public class HandleManagerImpl implements HandleManager {
     @Override
     public URI assignNewHandle(File file, URI targetURI) throws HandleException, IOException, URISyntaxException {
         
+        logger.debug("Assigning a newly generated handle. File: {}; target uri: {}", file, targetURI);
+        
         String generatedHandle = handleInfoRetriever.generateUuidHandle();
         
         HandleValue[] handleInformation = handleInfoRetriever.createHandleInformation(file, targetURI);
         
         handleUtil.createHandle(generatedHandle, handleInformation);
         
-        return new URI(generatedHandle);
+        URI generatedHandleURI = new URI(generatedHandle);
+        logger.debug("Generated handle - {} - was successfully created", generatedHandleURI);
+        return generatedHandleURI;
     }
 
     /**
@@ -115,6 +118,8 @@ public class HandleManagerImpl implements HandleManager {
      */
     @Override
     public void updateHandle(File file, URI handle, URI newTarget) throws HandleException, IOException {
+        
+        logger.debug("Handle '{}' for file '{}' being updated to new target uri: {}", handle, file, newTarget);
         
         HandleValue[] handleInformation = handleInfoRetriever.createHandleInformation(file, newTarget);
         
@@ -126,6 +131,8 @@ public class HandleManagerImpl implements HandleManager {
      */
     @Override
     public void deleteHandle(URI handle) throws HandleException, IOException {
+        
+        logger.debug("Handle '{}' being deleted", handle);
         
         handleUtil.deleteHandle(handle.toString());
     }

@@ -80,7 +80,7 @@ public class HandleManagerImplTest {
     
     @Before
     public void setUp() throws FileNotFoundException, IOException {
-        handleManager = new HandleManagerImpl(mockHandleInfoRetriever, mockHandleUtil, prefix, proxy);
+        handleManager = new HandleManagerImpl(mockHandleInfoRetriever, mockHandleUtil, prefix);
     }
     
     @After
