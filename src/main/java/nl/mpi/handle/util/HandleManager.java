@@ -29,6 +29,12 @@ import net.handle.hdllib.HandleException;
 public interface HandleManager {
     
     /**
+     * @param handleUri
+     * @return true if handle starts with the known prefix
+     */
+    public boolean isHandlePrefixKnown(URI handleUri);
+    
+    /**
      * Checks if the given handles are equivalent, by stripping them of eventual
      * prefixes.
      * 

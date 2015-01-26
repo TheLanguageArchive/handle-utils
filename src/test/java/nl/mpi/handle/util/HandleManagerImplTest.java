@@ -89,6 +89,58 @@ public class HandleManagerImplTest {
 
     
     @Test
+    public void handlePrefixIsKnown() {
+        
+        final URI handle = URI.create("hdl:12345/" + UUID.randomUUID().toString());
+        
+        context.checking(new Expectations() {{
+            oneOf(mockHandleInfoRetriever).isHandlePrefixKnown(handle.toString());
+                will(returnValue(Boolean.TRUE));
+        }});
+        
+        boolean result = handleManager.isHandlePrefixKnown(handle);
+        
+        assertTrue("Result should be true", result);        
+    }
+    
+    @Test
+    public void handlePrefixIsUnknown() {
+        
+        final URI handle = URI.create("hdl:98765/" + UUID.randomUUID().toString());
+        
+        context.checking(new Expectations() {{
+            oneOf(mockHandleInfoRetriever).isHandlePrefixKnown(handle.toString());
+                will(returnValue(Boolean.FALSE));
+        }});
+        
+        boolean result = handleManager.isHandlePrefixKnown(handle);
+        
+        assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void handleIsEmpty() {
+        
+        try {
+            handleManager.isHandlePrefixKnown(URI.create(""));
+            fail("should have thrown exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", "Invalid handle", ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void handleIsNull() {
+        
+        try {
+            handleManager.isHandlePrefixKnown(null);
+            fail("should have thrown exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", "Invalid handle", ex.getMessage());
+        }
+    }
+    
+    @Test
     public void handlesEqual() throws URISyntaxException {
         
         final String baseHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";

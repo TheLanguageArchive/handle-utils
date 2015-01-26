@@ -57,11 +57,17 @@ public class HandleInfoRetrieverImplTest {
     
     private HandleInfoRetriever handleInfoRetriever;
     
-    private final String proxy = "http://hdl.handle.net/";
+    private final String shortProxy = "hdl:";
+    private final String longProxy = "http://hdl.handle.net/";
     private final String prefix = "11142";
-    private final String handlePrefix = proxy + prefix + "/";;
-    private final String altPrefix = "hdl:" + prefix + "/";
+    private final String prefixWithSlash = prefix + "/";
+    private final String handleShortPrefix = shortProxy + prefixWithSlash;
+    private final String handleLongPrefix = longProxy + prefixWithSlash;;
     
+    private final String someOtherPrefix = "98765";
+    private final String someOtherPrefixWithSlash = someOtherPrefix + "/";
+    private final String handleSomeOtherShortPrefix = shortProxy + someOtherPrefixWithSlash;
+    private final String handleSomeOtherLongPrefix = longProxy + someOtherPrefixWithSlash;
     
     private final File mockFile = context.mock(File.class);
     
@@ -79,7 +85,7 @@ public class HandleInfoRetrieverImplTest {
     @Before
     public void setUp() {
         
-        handleInfoRetriever = new HandleInfoRetrieverImpl(prefix, proxy);
+        handleInfoRetriever = new HandleInfoRetrieverImpl(prefix);
     }
     
     @After
@@ -88,10 +94,76 @@ public class HandleInfoRetrieverImplTest {
 
     
     @Test
-    public void stripHandleStartingWithHandlePrefix() {
+    public void handleStartsWithKnownLongPrefix() {
         
         final String handleUuid = UUID.randomUUID().toString();
-        final String fullHandle = handlePrefix + handleUuid;
+        final String fullHandle = handleLongPrefix + handleUuid;
+        
+        boolean result = handleInfoRetriever.isHandlePrefixKnown(fullHandle);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void handleStartsWithKnownShortPrefix() {
+        
+        final String handleUuid = UUID.randomUUID().toString();
+        final String fullHandle = handleShortPrefix + handleUuid;
+        
+        boolean result = handleInfoRetriever.isHandlePrefixKnown(fullHandle);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void handleStartsWithKnownJustPrefix() {
+        
+        final String handleUuid = UUID.randomUUID().toString();
+        final String fullHandle = prefixWithSlash + handleUuid;
+        
+        boolean result = handleInfoRetriever.isHandlePrefixKnown(fullHandle);
+        
+        assertTrue("Result should be true", result);
+    }
+    
+    @Test
+    public void handleStartsWithUnknownLongPrefix() {
+        
+        final String handleUuid = UUID.randomUUID().toString();
+        final String fullHandle = handleSomeOtherLongPrefix + handleUuid;
+        
+        boolean result = handleInfoRetriever.isHandlePrefixKnown(fullHandle);
+        
+        assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void handleStartsWithUnknownShortPrefix() {
+        
+        final String handleUuid = UUID.randomUUID().toString();
+        final String fullHandle = handleSomeOtherShortPrefix + handleUuid;
+        
+        boolean result = handleInfoRetriever.isHandlePrefixKnown(fullHandle);
+        
+        assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void handleStartsWithUnknownJustPrefix() {
+        
+        final String handleUuid = UUID.randomUUID().toString();
+        final String fullHandle = someOtherPrefixWithSlash + handleUuid;
+        
+        boolean result = handleInfoRetriever.isHandlePrefixKnown(fullHandle);
+        
+        assertFalse("Result should be false", result);
+    }
+    
+    @Test
+    public void stripHandleStartingWithHandleLongPrefix() {
+        
+        final String handleUuid = UUID.randomUUID().toString();
+        final String fullHandle = handleLongPrefix + handleUuid;
         
         String result = handleInfoRetriever.stripHandle(fullHandle);
         
@@ -99,10 +171,10 @@ public class HandleInfoRetrieverImplTest {
     }
     
     @Test
-    public void stripHandleStartingWithAltPrefix() {
+    public void stripHandleStartingWithHandleShortPrefix() {
         
         final String handleUuid = UUID.randomUUID().toString();
-        final String fullHandle = altPrefix + handleUuid;
+        final String fullHandle = handleShortPrefix + handleUuid;
         
         String result = handleInfoRetriever.stripHandle(fullHandle);
         
@@ -110,19 +182,58 @@ public class HandleInfoRetrieverImplTest {
     }
     
     @Test
-    public void stripHandleStartingWithInvalidPrefix() {
+    public void stripHandleStartingWithJustPrefix() {
+        
+        final String handleUuid = UUID.randomUUID().toString();
+        final String fullHandle = prefixWithSlash + handleUuid;
+        
+        String result = handleInfoRetriever.stripHandle(fullHandle);
+        
+        assertEquals("Stripped handle different from expected", handleUuid, result);
+    }
+    
+    @Test
+    public void stripHandleStartingWithHandleSomeOtherLongPrefix() {
+        
+        // since the handle starts with an unknown prefix (but with a valid proxy), it doesn't strip the prefix,
+        //  otherwise it could match one of "our" handles
+        
+        final String handleUuid = UUID.randomUUID().toString();
+        final String handleWithJustPrefix = someOtherPrefixWithSlash + handleUuid;
+        final String fullHandle = handleSomeOtherLongPrefix + handleUuid;
+        
+        String result = handleInfoRetriever.stripHandle(fullHandle);
+        
+        assertEquals("Stripped handle different from expected", handleWithJustPrefix, result);
+    }
+    
+    @Test
+    public void stripHandleStartingWithHandleSomeOtherShortPrefix() {
+        
+        // since the handle starts with an unknown prefix (but with a valid proxy), it doesn't strip the prefix,
+        //  otherwise it could match one of "our" handles
+        
+        final String handleUuid = UUID.randomUUID().toString();
+        final String handleWithJustPrefix = someOtherPrefixWithSlash + handleUuid;
+        final String fullHandle = handleSomeOtherShortPrefix + handleUuid;
+        
+        String result = handleInfoRetriever.stripHandle(fullHandle);
+        
+        assertEquals("Stripped handle different from expected", handleWithJustPrefix, result);
+    }
+    
+    @Test
+    public void stripHandleStartingWithJustSomeOtherPrefix() {
+        
+        // since the handle starts with an unknown prefix (but with a valid proxy), it doesn't strip the prefix,
+        //  otherwise it could match one of "our" handles
         
         final String handleUuid = UUID.randomUUID().toString();
         final String fullHandle = "blabla/" + handleUuid;
         
-        final String expectedExceptionMessage = "Invalid handle prefix: " + fullHandle;
+        String result = handleInfoRetriever.stripHandle(fullHandle);
         
-        try {
-            handleInfoRetriever.stripHandle(fullHandle);
-            fail("should have thrown exception");
-        } catch(IllegalArgumentException ex) {
-            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
-        }
+        assertEquals("Stripped handle different from expected", fullHandle, result);
     }
 
     @Test
@@ -223,7 +334,7 @@ public class HandleInfoRetrieverImplTest {
     public void handleIsValidUuidWithHandlePrefix() {
         
         final UUID handleUuid = UUID.randomUUID();
-        final String handleWithValidUuid = handlePrefix + "/00-" + handleUuid.toString().toUpperCase();
+        final String handleWithValidUuid = handleLongPrefix + "/00-" + handleUuid.toString().toUpperCase();
         
         boolean result = handleInfoRetriever.handleIsValidUuid(handleWithValidUuid);
         
@@ -234,7 +345,7 @@ public class HandleInfoRetrieverImplTest {
     public void handleIsValidUuidWithAltPrefix() {
         
         final UUID handleUuid = UUID.randomUUID();
-        final String handleWithValidUuid = altPrefix + "/00-" + handleUuid.toString().toUpperCase();
+        final String handleWithValidUuid = handleShortPrefix + "/00-" + handleUuid.toString().toUpperCase();
         
         boolean result = handleInfoRetriever.handleIsValidUuid(handleWithValidUuid);
         
@@ -244,7 +355,7 @@ public class HandleInfoRetrieverImplTest {
     @Test
     public void handleIsInvalidUuid() {
         
-        final String handleWithInvalidUuid = handlePrefix + "/00-" + "123";
+        final String handleWithInvalidUuid = handleLongPrefix + "/00-" + "123";
         
         boolean result = handleInfoRetriever.handleIsValidUuid(handleWithInvalidUuid);
         

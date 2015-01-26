@@ -27,6 +27,12 @@ import net.handle.hdllib.HandleValue;
 public interface HandleInfoRetriever {
  
     /**
+     * @param handle
+     * @return true if handle starts with the known prefix
+     */
+    public boolean isHandlePrefixKnown(String handle);
+    
+    /**
      * Strips a handle of its prefixes
      * @param handle
      * @return stripped handle

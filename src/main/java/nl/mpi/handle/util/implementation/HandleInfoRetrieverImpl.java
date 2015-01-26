@@ -42,20 +42,33 @@ public class HandleInfoRetrieverImpl implements HandleInfoRetriever {
     
     private static final Logger logger = LoggerFactory.getLogger(HandleInfoRetrieverImpl.class);
     
+    private String hdlShortProxy = "hdl:";
+    private String hdlLongProxy = "http://hdl.handle.net/";
+    
     private String prefix;
-    
-    private String handlePrefix;
-    private String altPrefix;
-    private String justPrefix;
+    private String prefixWithSlash;
     
     
-    public HandleInfoRetrieverImpl(String prefix, String proxy) {
+    public HandleInfoRetrieverImpl(String prefix) {
         
         this.prefix = prefix;
         
-        this.justPrefix = prefix + "/";
-        this.handlePrefix = proxy + justPrefix;
-	this.altPrefix = "hdl:" + justPrefix;
+        prefixWithSlash = prefix + "/";
+    }
+    
+    /**
+     * @see HandleInfoRetriever#isHandlePrefixKnown(java.lang.String)
+     */
+    @Override
+    public boolean isHandlePrefixKnown(String handle) {
+        
+        String handleWithoutProxy = getHandleWithoutProxy(handle);
+        
+        if(handleWithoutProxy.startsWith(prefixWithSlash)) {
+            return true;
+        }
+        
+        return false;
     }
     
     /**
@@ -66,22 +79,28 @@ public class HandleInfoRetrieverImpl implements HandleInfoRetriever {
         
         logger.debug("Stripping handle: {}", handle);
         
-        String strippedHandle;
+        String handleWithoutProxy = getHandleWithoutProxy(handle);
         
-        if(handle.startsWith(justPrefix)) {
-            strippedHandle = handle.replace(justPrefix, "");
-        } else if(handle.startsWith(handlePrefix)) {
-            strippedHandle = handle.replace(handlePrefix, "");
-        } else if(handle.startsWith(altPrefix)) {
-            strippedHandle = handle.replace(altPrefix, "");
+        logger.debug("Removed proxy from handle: {}", handleWithoutProxy);
+        
+        if(handleWithoutProxy.startsWith(prefixWithSlash)) {
+            String handleWithoutPrefix = handleWithoutProxy.replace(prefixWithSlash, "");
+            logger.debug("Removed known prefix from handle: {}", handleWithoutPrefix);
+            return handleWithoutPrefix;
         } else {
-            //the handle should have a valid prefix
-            throw new IllegalArgumentException("Invalid handle prefix: " + handle);
+            logger.debug("Kept unknown prefix in handle: {}", handleWithoutProxy);
+            return handleWithoutProxy;
         }
-        
-        logger.debug("Stripped handle: {}", strippedHandle);
-        
-        return strippedHandle;
+    }
+    
+    private String getHandleWithoutProxy(String handle) {
+        if(handle.startsWith(hdlShortProxy)) {
+            return handle.replace(hdlShortProxy, "");
+        } else if(handle.startsWith(hdlLongProxy)) {
+            return handle.replace(hdlLongProxy, "");
+        } else {
+            return handle;
+        }
     }
     
     /**
@@ -149,13 +168,13 @@ public class HandleInfoRetrieverImpl implements HandleInfoRetriever {
         logger.debug("Checking if handle '{}' is a valid UUID", handle);
         
 	String uuid;
-	String testHandlePrefix = handlePrefix + "/00-";
-	String testAltPrefix = altPrefix + "/00-";
+	String testShortHandlePrefix = hdlShortProxy + prefixWithSlash + "/00-";
+	String testLongHandlePrefix = hdlLongProxy + prefixWithSlash + "/00-";
 	try {
-	    if (handle.startsWith(testHandlePrefix)) {
-		uuid = handle.replace(testHandlePrefix, "");
+	    if (handle.startsWith(testShortHandlePrefix)) {
+		uuid = handle.replace(testShortHandlePrefix, "");
 	    } else {
-		uuid = handle.replace(testAltPrefix, "");
+		uuid = handle.replace(testLongHandlePrefix, "");
 	    }
 	    logger.info("uuid : {}", uuid);
 	    UUID.fromString(uuid);

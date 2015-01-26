@@ -39,8 +39,11 @@ public class HandleManagerImpl implements HandleManager {
     private HandleInfoRetriever handleInfoRetriever;
     private HandleUtil handleUtil;
     
+    private String hdlShortPrefix = "hdl:";
+    private String hdlLongPrefix = "http://hdl.handle.net/";
+    
     private String justPrefix;
-    private String altPrefix;
+    private String completeHdlPrefix;
     
     public HandleManagerImpl(HandleInfoRetriever hdlInfoRetriever, HandleUtil hdlUtil, String prefix) throws FileNotFoundException, IOException {
 
@@ -48,7 +51,29 @@ public class HandleManagerImpl implements HandleManager {
         this.handleUtil = hdlUtil;
         
         this.justPrefix = prefix + "/";
-	this.altPrefix = "hdl:" + justPrefix;
+	this.completeHdlPrefix = hdlShortPrefix + justPrefix;
+    }
+
+
+    /**
+     * @see HandleManager#isHandlePrefixKnown(java.net.URI)
+     */
+    @Override
+    public boolean isHandlePrefixKnown(URI handleUri) {
+        
+        logger.debug("Checking if handle '{}' has a known prefix", handleUri);
+        
+        String handle = null;
+        
+        if(handleUri != null) {
+            handle = handleUri.toString();
+        }
+        
+        if(handle != null && !handle.isEmpty()) {
+            return handleInfoRetriever.isHandlePrefixKnown(handle);
+        }
+        
+        throw new IllegalArgumentException("Invalid handle");
     }
     
     /**
@@ -88,7 +113,7 @@ public class HandleManagerImpl implements HandleManager {
         logger.debug("Preparing handle '{}' with hdl prefix", handleToPrepare);
         
         String strippedHandle = handleInfoRetriever.stripHandle(handleToPrepare.toString());
-        URI handleWithHdlPrefix = new URI(altPrefix + strippedHandle);
+        URI handleWithHdlPrefix = new URI(completeHdlPrefix + strippedHandle);
         
         logger.debug("Prepared handle: {}", handleWithHdlPrefix);
         return handleWithHdlPrefix;
