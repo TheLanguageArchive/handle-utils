@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.io.Serializable;
 import java.util.Properties;
 import net.handle.api.HSAdapter;
 import net.handle.api.HSAdapterFactory;
@@ -25,7 +26,7 @@ import org.apache.commons.io.IOUtils;
  * @version 1.0
  * @license This software is licensed as open source software pursuant to the terms defined in the Joint ADL Co-Lab Open Source Software License.  Use of any part of this software constitutes acceptance of this license. The Joint ADL Co-Lab open source agreement is available at {@link http://adlregistry.adlnet.gov/source_license.html}.
  */
-public class HandleUtil
+public class HandleUtil implements Serializable
 {
     private final String handleAdminKeyFilePath;
     private final int adminUserHandleIndex;

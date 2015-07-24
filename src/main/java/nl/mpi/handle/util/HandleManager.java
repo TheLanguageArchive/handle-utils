@@ -29,30 +29,6 @@ import net.handle.hdllib.HandleException;
 public interface HandleManager {
     
     /**
-     * @param handleUri
-     * @return true if handle starts with the known prefix
-     */
-    public boolean isHandlePrefixKnown(URI handleUri);
-    
-    /**
-     * Checks if the given handles are equivalent, by stripping them of eventual
-     * prefixes.
-     * 
-     * @param aHandleUri
-     * @param anotherHandleUri
-     * @return true if the handles are equivalent
-     */
-    public boolean areHandlesEquivalent(URI aHandleUri, URI anotherHandleUri);
-    
-    /**
-     * Adds the appropriate prefix to the given handle, if necessary
-     * 
-     * @param handleToPrepare handle which may or may not have already the prefix
-     * @return handle with the appropriate prefix
-     */
-    public URI prepareHandleWithHdlPrefix(URI handleToPrepare) throws URISyntaxException;
-    
-    /**
      * Generates a handle and associated information, and assigns it to the
      * target URI
      * 
@@ -64,7 +40,7 @@ public interface HandleManager {
     
     /**
      * Updates the target of the given handle.
-     * @param current location of the file to which the handle should be updated
+     * @param file location of the file to which the handle should be updated
      * @param handle handle to update, as a URI
      * @param newTarget new target to which the handle should point
      */

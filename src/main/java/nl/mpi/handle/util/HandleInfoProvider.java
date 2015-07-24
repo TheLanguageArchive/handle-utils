@@ -21,24 +21,11 @@ import java.net.URI;
 import net.handle.hdllib.HandleValue;
 
 /**
- * Helper class that deals with handle information.
+ * Helper class that provides information related with handles.
  * @author guisil
  */
-public interface HandleInfoRetriever {
+public interface HandleInfoProvider {
  
-    /**
-     * @param handle
-     * @return true if handle starts with the known prefix
-     */
-    public boolean isHandlePrefixKnown(String handle);
-    
-    /**
-     * Strips a handle of its prefixes
-     * @param handle
-     * @return stripped handle
-     */
-    public String stripHandle(String handle);
-    
     /**
      * Creates the information for the handle, based on the file and URI
      * @param file

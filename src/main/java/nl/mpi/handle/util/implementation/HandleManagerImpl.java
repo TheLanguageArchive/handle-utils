@@ -19,11 +19,11 @@ package nl.mpi.handle.util.implementation;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URI;
-import java.net.URISyntaxException;
 import net.handle.hdllib.HandleException;
 import net.handle.hdllib.HandleValue;
-import nl.mpi.handle.util.HandleInfoRetriever;
+import nl.mpi.handle.util.HandleInfoProvider;
 import nl.mpi.handle.util.HandleManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,108 +32,36 @@ import org.slf4j.LoggerFactory;
  * @see HandleManager
  * @author guisil
  */
-public class HandleManagerImpl implements HandleManager {
+public class HandleManagerImpl implements HandleManager, Serializable {
     
     private static final Logger logger = LoggerFactory.getLogger(HandleManagerImpl.class);
     
-    private HandleInfoRetriever handleInfoRetriever;
-    private HandleUtil handleUtil;
+    private final HandleInfoProvider handleInfoProvider;
+    private final HandleUtil handleUtil;
     
-    private String hdlShortPrefix = "hdl:";
-    private String hdlLongPrefix = "http://hdl.handle.net/";
-    
-    private String justPrefix;
-    private String completeHdlPrefix;
-    
-    public HandleManagerImpl(HandleInfoRetriever hdlInfoRetriever, HandleUtil hdlUtil, String prefix) throws FileNotFoundException, IOException {
+    public HandleManagerImpl(HandleInfoProvider hdlInfoRetriever, HandleUtil hdlUtil, String prefix)
+            throws FileNotFoundException, IOException {
 
-        this.handleInfoRetriever = hdlInfoRetriever;
+        this.handleInfoProvider = hdlInfoRetriever;
         this.handleUtil = hdlUtil;
-        
-        this.justPrefix = prefix + "/";
-	this.completeHdlPrefix = hdlShortPrefix + justPrefix;
     }
 
-
-    /**
-     * @see HandleManager#isHandlePrefixKnown(java.net.URI)
-     */
-    @Override
-    public boolean isHandlePrefixKnown(URI handleUri) {
-        
-        logger.debug("Checking if handle '{}' has a known prefix", handleUri);
-        
-        String handle = null;
-        
-        if(handleUri != null) {
-            handle = handleUri.toString();
-        }
-        
-        if(handle != null && !handle.isEmpty()) {
-            return handleInfoRetriever.isHandlePrefixKnown(handle);
-        }
-        
-        throw new IllegalArgumentException("Invalid handle");
-    }
-    
-    /**
-     * @see HandleManager#areHandlesEquivalent(java.net.URI, java.net.URI)
-     */
-    @Override
-    public boolean areHandlesEquivalent(URI aHandleUri, URI anotherHandleUri) {
-        
-        logger.debug("Checking if handles '{}' and '{}' are equivalent", aHandleUri, anotherHandleUri);
-
-        String aHandle = null;
-        String anotherHandle = null;
-        
-        if(aHandleUri != null && anotherHandleUri != null) {
-            aHandle = aHandleUri.toString();
-            anotherHandle = anotherHandleUri.toString();
-        }
-        
-        //TODO validate handles first?
-        if(aHandle != null && !aHandle.isEmpty() && anotherHandle != null && !anotherHandle.isEmpty()) {
-           
-            String aStrippedHandle = handleInfoRetriever.stripHandle(aHandle);
-            String anotherStrippedHandle = handleInfoRetriever.stripHandle(anotherHandle);
-
-            return aStrippedHandle.equals(anotherStrippedHandle);
-        }
-        
-        throw new IllegalArgumentException("Invalid handle(s)");
-    }
-
-    /**
-     * @see HandleManager#prepareHandleWithHdlPrefix(java.net.URI)
-     */
-    @Override
-    public URI prepareHandleWithHdlPrefix(URI handleToPrepare) throws URISyntaxException {
-        
-        logger.debug("Preparing handle '{}' with hdl prefix", handleToPrepare);
-        
-        String strippedHandle = handleInfoRetriever.stripHandle(handleToPrepare.toString());
-        URI handleWithHdlPrefix = new URI(completeHdlPrefix + strippedHandle);
-        
-        logger.debug("Prepared handle: {}", handleWithHdlPrefix);
-        return handleWithHdlPrefix;
-    }
     
     /**
      * @see HandleManager#assignNewHandle(java.io.File, java.net.URI)
      */
     @Override
-    public URI assignNewHandle(File file, URI targetURI) throws HandleException, IOException, URISyntaxException {
+    public URI assignNewHandle(File file, URI targetURI) throws HandleException, IOException {
         
         logger.debug("Assigning a newly generated handle. File: {}; target uri: {}", file, targetURI);
         
-        String generatedHandle = handleInfoRetriever.generateUuidHandle();
+        String generatedHandle = handleInfoProvider.generateUuidHandle();
         
-        HandleValue[] handleInformation = handleInfoRetriever.createHandleInformation(file, targetURI);
+        HandleValue[] handleInformation = handleInfoProvider.createHandleInformation(file, targetURI);
         
         handleUtil.createHandle(generatedHandle, handleInformation);
         
-        URI generatedHandleURI = new URI(generatedHandle);
+        URI generatedHandleURI = URI.create(generatedHandle);
         logger.debug("Generated handle - {} - was successfully created", generatedHandleURI);
         return generatedHandleURI;
     }
@@ -146,7 +74,7 @@ public class HandleManagerImpl implements HandleManager {
         
         logger.debug("Handle '{}' for file '{}' being updated to new target uri: {}", handle, file, newTarget);
         
-        HandleValue[] handleInformation = handleInfoRetriever.createHandleInformation(file, newTarget);
+        HandleValue[] handleInformation = handleInfoProvider.createHandleInformation(file, newTarget);
         
         handleUtil.updateHandleValue(handle.toString(), handleInformation);
     }

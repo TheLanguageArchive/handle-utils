@@ -17,6 +17,7 @@
 package nl.mpi.handle.util.implementation;
 
 import java.io.File;
+import java.io.Serializable;
 import java.net.URI;
 import java.sql.Timestamp;
 import java.util.Calendar;
@@ -26,83 +27,32 @@ import net.handle.hdllib.Common;
 import net.handle.hdllib.Encoder;
 import net.handle.hdllib.HandleValue;
 import net.handle.hdllib.Util;
-import nl.mpi.handle.util.HandleInfoRetriever;
+import nl.mpi.handle.util.HandleInfoProvider;
 import nl.mpi.util.Checksum;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @see HandleInfoRetriever
+ * @see HandleInfoProvider
  * 
  * Part of the implementation was adapted from the CMDI Handle Assigner project
  * 
  * @author guisil
  */
-public class HandleInfoRetrieverImpl implements HandleInfoRetriever {
+public class HandleInfoProviderImpl implements HandleInfoProvider, Serializable {
     
-    private static final Logger logger = LoggerFactory.getLogger(HandleInfoRetrieverImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(HandleInfoProviderImpl.class);
     
-    private String hdlShortProxy = "hdl:";
-    private String hdlLongProxy = "http://hdl.handle.net/";
-    
-    private String prefix;
-    private String prefixWithSlash;
+    private final String prefix;
+    private final String prefixWithSlash;
     
     
-    public HandleInfoRetrieverImpl(String prefix) {
-        
+    public HandleInfoProviderImpl(String prefix) {
         this.prefix = prefix;
-        
         prefixWithSlash = prefix + "/";
     }
     
-    /**
-     * @see HandleInfoRetriever#isHandlePrefixKnown(java.lang.String)
-     */
-    @Override
-    public boolean isHandlePrefixKnown(String handle) {
-        
-        String handleWithoutProxy = getHandleWithoutProxy(handle);
-        
-        if(handleWithoutProxy.startsWith(prefixWithSlash)) {
-            return true;
-        }
-        
-        return false;
-    }
-    
-    /**
-     * @see HandleInfoRetriever#stripHandle(java.lang.String)
-     */
-    @Override
-    public String stripHandle(String handle) {
-        
-        logger.debug("Stripping handle: {}", handle);
-        
-        String handleWithoutProxy = getHandleWithoutProxy(handle);
-        
-        logger.debug("Removed proxy from handle: {}", handleWithoutProxy);
-        
-        if(handleWithoutProxy.startsWith(prefixWithSlash)) {
-            String handleWithoutPrefix = handleWithoutProxy.replace(prefixWithSlash, "");
-            logger.debug("Removed known prefix from handle: {}", handleWithoutPrefix);
-            return handleWithoutPrefix;
-        } else {
-            logger.debug("Kept unknown prefix in handle: {}", handleWithoutProxy);
-            return handleWithoutProxy;
-        }
-    }
-    
-    private String getHandleWithoutProxy(String handle) {
-        if(handle.startsWith(hdlShortProxy)) {
-            return handle.replace(hdlShortProxy, "");
-        } else if(handle.startsWith(hdlLongProxy)) {
-            return handle.replace(hdlLongProxy, "");
-        } else {
-            return handle;
-        }
-    }
-    
+
     /**
      * @see HandleInfoRetriever#createHandleInformation(java.io.File, java.net.URI)
      */
@@ -168,8 +118,8 @@ public class HandleInfoRetrieverImpl implements HandleInfoRetriever {
         logger.debug("Checking if handle '{}' is a valid UUID", handle);
         
 	String uuid;
-	String testShortHandlePrefix = hdlShortProxy + prefixWithSlash + "/00-";
-	String testLongHandlePrefix = hdlLongProxy + prefixWithSlash + "/00-";
+	String testShortHandlePrefix = HandleConstants.HDL_SHORT_PROXY + prefixWithSlash + "/00-";
+	String testLongHandlePrefix = HandleConstants.HDL_LONG_PROXY + prefixWithSlash + "/00-";
 	try {
 	    if (handle.startsWith(testShortHandlePrefix)) {
 		uuid = handle.replace(testShortHandlePrefix, "");
