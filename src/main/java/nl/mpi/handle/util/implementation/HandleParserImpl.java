@@ -95,8 +95,8 @@ public class HandleParserImpl implements HandleParser, Serializable {
         //TODO validate handles first?
         if(aHandle != null && !aHandle.isEmpty() && anotherHandle != null && !anotherHandle.isEmpty()) {
            
-            String aStrippedHandle = stripHandle(aHandle);
-            String anotherStrippedHandle = stripHandle(anotherHandle);
+            String aStrippedHandle = stripHandleIfPrefixIsKnown(aHandle);
+            String anotherStrippedHandle = stripHandleIfPrefixIsKnown(anotherHandle);
 
             return aStrippedHandle.equals(anotherStrippedHandle);
         }
@@ -112,7 +112,7 @@ public class HandleParserImpl implements HandleParser, Serializable {
 
         logger.debug("Preparing handle '{}' with hdl prefix", handleToPrepare);
 
-        String strippedHandle = stripHandle(handleToPrepare.toString());
+        String strippedHandle = stripHandleIfPrefixIsKnown(handleToPrepare.toString());
        // URI handleWithHdlPrefix = URI.create(completeHdlPrefix + strippedHandle);
 
         URI handleWithHdlPrefix = URI.create(isHandlePrefixKnown(strippedHandle) || strippedHandle.indexOf("/") == -1 ? 
@@ -123,10 +123,10 @@ public class HandleParserImpl implements HandleParser, Serializable {
     }
     
     /**
-     * @see HandleParser#stripHandle(java.lang.String)
+     * @see HandleParser#stripHandleIfPrefixIsKnown(java.lang.String)
      */
     @Override
-    public String stripHandle(String handle) {
+    public String stripHandleIfPrefixIsKnown(String handle) {
         
         logger.debug("Stripping handle: {}", handle);
         

@@ -56,9 +56,10 @@ public interface HandleParser {
     public URI prepareHandleWithHdlPrefix(URI handleToPrepare);
     
     /**
-     * Strips a handle of its prefixes
+     * Strips a handle of its prefixes.
+     * If the prefix is unknown, it will be untouched.
      * @param handle
      * @return stripped handle
      */
-    public String stripHandle(String handle);
+    public String stripHandleIfPrefixIsKnown(String handle);
 }

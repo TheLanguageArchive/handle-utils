@@ -177,7 +177,7 @@ public class HandleParserImplTest {
     public void handlesEqual() {
         
         final String baseHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
-        final URI firstHandle = URI.create(HandleConstants.HDL_LONG_PROXY + prefix + "/" + baseHandle);
+        final URI firstHandle = URI.create(HandleConstants.HDL_LONG_PROXY + prefixWithSlash + baseHandle);
         final URI secondHandle = firstHandle;
         
         boolean result = handleParser.areHandlesEquivalent(firstHandle, secondHandle);
@@ -190,8 +190,8 @@ public class HandleParserImplTest {
         
         final String firstBaseHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
         final String secondBaseHandle = "00-0B0B1C1C-2D2D-3E3E-4F4F-4F5GG5G6H7H9";
-        final URI firstHandle = URI.create(HandleConstants.HDL_LONG_PROXY + prefix + "/" + firstBaseHandle);
-        final URI secondHandle = URI.create(HandleConstants.HDL_LONG_PROXY + prefix + "/" + secondBaseHandle);
+        final URI firstHandle = URI.create(HandleConstants.HDL_LONG_PROXY + prefixWithSlash + firstBaseHandle);
+        final URI secondHandle = URI.create(HandleConstants.HDL_LONG_PROXY + prefixWithSlash + secondBaseHandle);
         
         boolean result = handleParser.areHandlesEquivalent(firstHandle, secondHandle);
         
@@ -203,7 +203,7 @@ public class HandleParserImplTest {
         
         String baseHandle = "/00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
         URI firstHandle = null;
-        URI secondHandle = URI.create(HandleConstants.HDL_SHORT_PROXY + prefix + "/" + baseHandle);
+        URI secondHandle = URI.create(HandleConstants.HDL_SHORT_PROXY + prefixWithSlash + baseHandle);
         
         try {
             handleParser.areHandlesEquivalent(firstHandle, secondHandle);
@@ -217,7 +217,7 @@ public class HandleParserImplTest {
     public void handlesDifferentOneIsNull() {
         
         String baseHandle = "/00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
-        URI firstHandle = URI.create(HandleConstants.HDL_LONG_PROXY + prefix + "/" + baseHandle);
+        URI firstHandle = URI.create(HandleConstants.HDL_LONG_PROXY + prefixWithSlash + baseHandle);
         URI secondHandle = null;
         
         try {
@@ -232,48 +232,83 @@ public class HandleParserImplTest {
     public void prepareHandleContainingNoPrefix() {
         
         final String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
-        final URI initialHandle = URI.create(strippedHandle);
-        final URI expectedHandle = URI.create(HandleConstants.HDL_SHORT_PROXY + prefix + "/" + strippedHandle);
+        URI initialHandle = URI.create(strippedHandle);
+        URI expectedHandle = URI.create(HandleConstants.HDL_SHORT_PROXY + prefixWithSlash + strippedHandle);
         
         URI retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
         
-        assertEquals("Retrieved handle different from expected", expectedHandle, retrievedHandle);
+        assertEquals("Retrieved handle different from expected (no prefix)", expectedHandle, retrievedHandle);
+        
+        // with just a slash in the beginning
+        
+        initialHandle = URI.create("/" + strippedHandle);
+        
+        retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
+        
+        assertEquals("Retrieved handle different from expected (just with slash)", expectedHandle, retrievedHandle);
     }
     
     @Test
     public void prepareHandleContainingJustPrefix() {
         
         final String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
-        final URI initialHandle = URI.create(prefix + "/" + strippedHandle);
-        final URI expectedHandle = URI.create(HandleConstants.HDL_SHORT_PROXY + prefix + "/" + strippedHandle);
+        URI initialHandle = URI.create(prefixWithSlash + strippedHandle);
+        URI expectedHandle = URI.create(HandleConstants.HDL_SHORT_PROXY + prefixWithSlash + strippedHandle);
         
         URI retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
         
-        assertEquals("Retrieved handle different from expected", expectedHandle, retrievedHandle);
+        assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
+        
+        // with a different prefix
+        
+        initialHandle = URI.create(someOtherPrefixWithSlash + strippedHandle);
+        expectedHandle = URI.create(HandleConstants.HDL_SHORT_PROXY + someOtherPrefixWithSlash + strippedHandle);
+        
+        retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
+        
+        assertEquals("Retrieved handle different from expected (some other prefix)", expectedHandle, retrievedHandle);
     }
     
     @Test
     public void prepareHandleContainingHdlPrefix() {
         
         final String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
-        final URI initialHandle = URI.create(HandleConstants.HDL_SHORT_PROXY + prefix + "/" + strippedHandle);
-        final URI expectedHandle = initialHandle;
+        URI initialHandle = URI.create(HandleConstants.HDL_SHORT_PROXY + prefixWithSlash + strippedHandle);
+        URI expectedHandle = initialHandle;
         
         URI retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
         
-        assertEquals("Retrieved handle different from expected", expectedHandle, retrievedHandle);
+        assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
+        
+        // with a different prefix
+        
+        initialHandle = URI.create(HandleConstants.HDL_SHORT_PROXY + someOtherPrefixWithSlash + strippedHandle);
+        expectedHandle = initialHandle;
+        
+        retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
+        
+        assertEquals("Retrieved handle different from expected (some other prefix)", expectedHandle, retrievedHandle);
     }
     
     @Test
     public void prepareHandleContainingFullPrefix() {
         
         final String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
-        final URI initialHandle = URI.create(HandleConstants.HDL_LONG_PROXY + prefix + "/" + strippedHandle);
-        final URI expectedHandle = URI.create(HandleConstants.HDL_SHORT_PROXY + prefix + "/" + strippedHandle);
+        URI initialHandle = URI.create(HandleConstants.HDL_LONG_PROXY + prefixWithSlash + strippedHandle);
+        URI expectedHandle = URI.create(HandleConstants.HDL_SHORT_PROXY + prefixWithSlash + strippedHandle);
         
         URI retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
         
-        assertEquals("Retrieved handle different from expected", expectedHandle, retrievedHandle);
+        assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
+        
+        // with a different prefix
+        
+        initialHandle = URI.create(HandleConstants.HDL_LONG_PROXY + someOtherPrefixWithSlash + strippedHandle);
+        expectedHandle = URI.create(HandleConstants.HDL_SHORT_PROXY + someOtherPrefixWithSlash + strippedHandle);
+        
+        retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
+        
+        assertEquals("Retrieved handle different from expected (some other prefix)", expectedHandle, retrievedHandle);
     }
     
     @Test
@@ -282,7 +317,7 @@ public class HandleParserImplTest {
         final String handleUuid = UUID.randomUUID().toString();
         final String fullHandle = handleLongPrefix + handleUuid;
         
-        String result = handleParser.stripHandle(fullHandle);
+        String result = handleParser.stripHandleIfPrefixIsKnown(fullHandle);
         
         assertEquals("Stripped handle different from expected", handleUuid, result);
     }
@@ -293,7 +328,7 @@ public class HandleParserImplTest {
         final String handleUuid = UUID.randomUUID().toString();
         final String fullHandle = handleShortPrefix + handleUuid;
         
-        String result = handleParser.stripHandle(fullHandle);
+        String result = handleParser.stripHandleIfPrefixIsKnown(fullHandle);
         
         assertEquals("Stripped handle different from expected", handleUuid, result);
     }
@@ -304,9 +339,26 @@ public class HandleParserImplTest {
         final String handleUuid = UUID.randomUUID().toString();
         final String fullHandle = prefixWithSlash + handleUuid;
         
-        String result = handleParser.stripHandle(fullHandle);
+        String result = handleParser.stripHandleIfPrefixIsKnown(fullHandle);
         
         assertEquals("Stripped handle different from expected", handleUuid, result);
+    }
+    
+    @Test
+    public void stripHandleWithoutPrefix() {
+        
+        final String handleUuid = UUID.randomUUID().toString();
+        
+        String result = handleParser.stripHandleIfPrefixIsKnown(handleUuid);
+        
+        assertEquals("Stripped handle different from expected (no prefix)", handleUuid, result);
+        
+        
+        final String handleUuidWithJustSlash = "/" + handleUuid;
+        
+        result = handleParser.stripHandleIfPrefixIsKnown(handleUuidWithJustSlash);
+        
+        assertEquals("Stripped handle different from expected (with just slash)", handleUuid, result);
     }
     
     @Test
@@ -319,7 +371,7 @@ public class HandleParserImplTest {
         final String handleWithJustPrefix = someOtherPrefixWithSlash + handleUuid;
         final String fullHandle = handleSomeOtherLongPrefix + handleUuid;
         
-        String result = handleParser.stripHandle(fullHandle);
+        String result = handleParser.stripHandleIfPrefixIsKnown(fullHandle);
         
         assertEquals("Stripped handle different from expected", handleWithJustPrefix, result);
     }
@@ -334,7 +386,7 @@ public class HandleParserImplTest {
         final String handleWithJustPrefix = someOtherPrefixWithSlash + handleUuid;
         final String fullHandle = handleSomeOtherShortPrefix + handleUuid;
         
-        String result = handleParser.stripHandle(fullHandle);
+        String result = handleParser.stripHandleIfPrefixIsKnown(fullHandle);
         
         assertEquals("Stripped handle different from expected", handleWithJustPrefix, result);
     }
@@ -348,7 +400,7 @@ public class HandleParserImplTest {
         final String handleUuid = UUID.randomUUID().toString();
         final String fullHandle = "blabla/" + handleUuid;
         
-        String result = handleParser.stripHandle(fullHandle);
+        String result = handleParser.stripHandleIfPrefixIsKnown(fullHandle);
         
         assertEquals("Stripped handle different from expected", fullHandle, result);
     }
