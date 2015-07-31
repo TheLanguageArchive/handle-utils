@@ -95,8 +95,8 @@ public class HandleParserImpl implements HandleParser, Serializable {
         //TODO validate handles first?
         if(aHandle != null && !aHandle.isEmpty() && anotherHandle != null && !anotherHandle.isEmpty()) {
            
-            String aStrippedHandle = stripHandleIfPrefixIsKnown(aHandle);
-            String anotherStrippedHandle = stripHandleIfPrefixIsKnown(anotherHandle);
+            String aStrippedHandle = stripHandleIfPrefixIsKnown(aHandleUri);
+            String anotherStrippedHandle = stripHandleIfPrefixIsKnown(anotherHandleUri);
 
             return aStrippedHandle.equals(anotherStrippedHandle);
         }
@@ -112,7 +112,7 @@ public class HandleParserImpl implements HandleParser, Serializable {
 
         logger.debug("Preparing handle '{}' with hdl prefix", handleToPrepare);
 
-        String strippedHandle = stripHandleIfPrefixIsKnown(handleToPrepare.toString());
+        String strippedHandle = stripHandleIfPrefixIsKnown(handleToPrepare);
        // URI handleWithHdlPrefix = URI.create(completeHdlPrefix + strippedHandle);
 
         URI handleWithHdlPrefix = URI.create(isHandlePrefixKnown(strippedHandle) || strippedHandle.indexOf("/") == -1 ? 
@@ -123,14 +123,14 @@ public class HandleParserImpl implements HandleParser, Serializable {
     }
     
     /**
-     * @see HandleParser#stripHandleIfPrefixIsKnown(java.lang.String)
+     * @see HandleParser#stripHandleIfPrefixIsKnown(java.net.URI)
      */
     @Override
-    public String stripHandleIfPrefixIsKnown(String handle) {
+    public String stripHandleIfPrefixIsKnown(URI handle) {
         
         logger.debug("Stripping handle: {}", handle);
         
-        String handleWithoutProxy = getHandleWithoutProxy(handle);
+        String handleWithoutProxy = getHandleWithoutProxy(handle.toString());
         
         logger.debug("Removed proxy from handle: {}", handleWithoutProxy);
         
@@ -163,7 +163,7 @@ public class HandleParserImpl implements HandleParser, Serializable {
         } else if(handle.startsWith(HandleConstants.HDL_LONG_PROXY)) {
             return handle.replace(HandleConstants.HDL_LONG_PROXY, "");
         } else if(handle.startsWith("/"))
-        	return handle.substring(1);
+            return handle.substring(1);
         else {
             return handle;
         }

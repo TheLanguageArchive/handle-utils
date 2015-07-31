@@ -61,5 +61,5 @@ public interface HandleParser {
      * @param handle
      * @return stripped handle
      */
-    public String stripHandleIfPrefixIsKnown(String handle);
+    public String stripHandleIfPrefixIsKnown(URI handle);
 }
