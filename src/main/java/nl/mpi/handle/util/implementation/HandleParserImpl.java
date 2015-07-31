@@ -162,7 +162,9 @@ public class HandleParserImpl implements HandleParser, Serializable {
             return handle.replace(HandleConstants.HDL_SHORT_PROXY, "");
         } else if(handle.startsWith(HandleConstants.HDL_LONG_PROXY)) {
             return handle.replace(HandleConstants.HDL_LONG_PROXY, "");
-        } else {
+        } else if(handle.startsWith("/"))
+        	return handle.substring(1);
+        else {
             return handle;
         }
     }
