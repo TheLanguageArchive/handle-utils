@@ -109,12 +109,15 @@ public class HandleParserImpl implements HandleParser, Serializable {
      */
     @Override
     public URI prepareHandleWithHdlPrefix(URI handleToPrepare) {
-        
+
         logger.debug("Preparing handle '{}' with hdl prefix", handleToPrepare);
-        
+
         String strippedHandle = stripHandle(handleToPrepare.toString());
-        URI handleWithHdlPrefix = URI.create(completeHdlPrefix + strippedHandle);
-        
+       // URI handleWithHdlPrefix = URI.create(completeHdlPrefix + strippedHandle);
+
+        URI handleWithHdlPrefix = URI.create(isHandlePrefixKnown(strippedHandle) || strippedHandle.indexOf("/") == -1 ? 
+            completeHdlPrefix + strippedHandle : HandleConstants.HDL_SHORT_PROXY + strippedHandle);
+
         logger.debug("Prepared handle: {}", handleWithHdlPrefix);
         return handleWithHdlPrefix;
     }
