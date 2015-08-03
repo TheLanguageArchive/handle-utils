@@ -16,12 +16,15 @@
  */
 package nl.mpi.handle.util.implementation;
 
+import java.util.regex.Pattern;
+
 /**
  *
  * @author guisil
  */
 public class HandleConstants {
     
-    public static final String HDL_SHORT_PROXY = "hdl:";
+    public static final String HDL_SHORT_PROXY = "hdl";
     public static final String HDL_LONG_PROXY = "http://hdl.handle.net/";
+    public static final Pattern HANDLE_PATTERN = Pattern.compile("^[^/]+/[^/]+$");
 }

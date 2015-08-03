@@ -25,6 +25,14 @@ import java.net.URI;
 public interface HandleParser {
 
     /**
+     * Adapted from the HandleUtil class in the Metadata API.
+     * @param handleUri
+     * @return true if handleUri is composed of a known proxy and
+     *  matches the expected handle pattern
+     */
+    public boolean isHandleUri(URI handleUri);
+    
+    /**
      * @param uri
      * @return true if uri starts with one of the known proxies
      * ("hdl:" or "http://hdl.handle.net/").
@@ -34,6 +42,7 @@ public interface HandleParser {
     /**
      * @param handleUri
      * @return true if handle starts with the known prefix
+     * @throws IllegalArgumentException if the handle is not valid
      */
     public boolean isHandlePrefixKnown(URI handleUri);
     
@@ -44,14 +53,16 @@ public interface HandleParser {
      * @param aHandleUri
      * @param anotherHandleUri
      * @return true if the handles are equivalent
+     * @throws IllegalArgumentException if any of the handles is not valid
      */
     public boolean areHandlesEquivalent(URI aHandleUri, URI anotherHandleUri);
         
     /**
-     * Adds the appropriate prefix to the given handle, if necessary
+     * Adds the appropriate prefix to the given handle, if necessary.
      * 
      * @param handleToPrepare handle which may or may not have already the prefix
-     * @return handle with the appropriate prefix
+     * @return handle with the appropriate prefix, or null if an empty or null handle is passed
+     * @throws IllegalArgumentException if the handle is not valid
      */
     public URI prepareHandleWithHdlPrefix(URI handleToPrepare);
     
@@ -59,7 +70,8 @@ public interface HandleParser {
      * Strips a handle of its prefixes.
      * If the prefix is unknown, it will be untouched.
      * @param handle
-     * @return stripped handle
+     * @return stripped handle, or null if an empty or null handle is passed
+     * @throws IllegalArgumentException if the handle is not valid
      */
     public String stripHandleIfPrefixIsKnown(URI handle);
 }
