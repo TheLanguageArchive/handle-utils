@@ -19,10 +19,11 @@
         <url>http://lux16.mpi.nl/jenkins/job/handle-utils/</url>
     </ciManagement>
     <properties>
-	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.build.sourceLevel>1.7</project.build.sourceLevel>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
         <encoding>UTF-8</encoding>
-	<netbeans.hint.license>gpl30</netbeans.hint.license>
+        <netbeans.hint.license>gpl30</netbeans.hint.license>
     </properties>
 
     <distributionManagement>
