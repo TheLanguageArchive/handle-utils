@@ -59,7 +59,7 @@ public class HandleInfoProviderImplTest {
 
     private final String prefix = "11142";
     private final String prefixWithSlash = prefix + "/";
-    private final String handleShortPrefix = HandleConstants.HDL_SHORT_PROXY + prefixWithSlash;
+    private final String handleShortPrefix = HandleConstants.HDL_SHORT_PROXY + ":" + prefixWithSlash;
     private final String handleLongPrefix = HandleConstants.HDL_LONG_PROXY + prefixWithSlash;
     
     private final File mockFile = context.mock(File.class);
@@ -171,7 +171,7 @@ public class HandleInfoProviderImplTest {
     public void generateHandle() {
         
         final UUID handleUuid = UUID.randomUUID();
-        final String expectedHandle = prefix + "/00-" + handleUuid.toString().toUpperCase();
+        final String expectedHandle = prefixWithSlash + handleUuid.toString().toUpperCase();
         
         stub(method(UUID.class, "randomUUID")).toReturn(handleUuid);
         
@@ -184,7 +184,7 @@ public class HandleInfoProviderImplTest {
     public void handleIsValidUuidWithHandlePrefix() {
         
         final UUID handleUuid = UUID.randomUUID();
-        final String handleWithValidUuid = handleLongPrefix + "/00-" + handleUuid.toString().toUpperCase();
+        final String handleWithValidUuid = handleLongPrefix + handleUuid.toString().toUpperCase();
         
         boolean result = handleInfoRetriever.handleIsValidUuid(handleWithValidUuid);
         
@@ -195,7 +195,7 @@ public class HandleInfoProviderImplTest {
     public void handleIsValidUuidWithAltPrefix() {
         
         final UUID handleUuid = UUID.randomUUID();
-        final String handleWithValidUuid = handleShortPrefix + "/00-" + handleUuid.toString().toUpperCase();
+        final String handleWithValidUuid = handleShortPrefix + handleUuid.toString().toUpperCase();
         
         boolean result = handleInfoRetriever.handleIsValidUuid(handleWithValidUuid);
         
@@ -205,7 +205,7 @@ public class HandleInfoProviderImplTest {
     @Test
     public void handleIsInvalidUuid() {
         
-        final String handleWithInvalidUuid = handleLongPrefix + "/00-" + "123";
+        final String handleWithInvalidUuid = handleLongPrefix + "123";
         
         boolean result = handleInfoRetriever.handleIsValidUuid(handleWithInvalidUuid);
         

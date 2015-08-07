@@ -54,7 +54,7 @@ public class HandleInfoProviderImpl implements HandleInfoProvider, Serializable 
     
 
     /**
-     * @see HandleInfoRetriever#createHandleInformation(java.io.File, java.net.URI)
+     * @see HandleInfoProvider#createHandleInformation(java.io.File, java.net.URI)
      */
     @Override
     public HandleValue[] createHandleInformation(File file, URI uri) {
@@ -96,7 +96,7 @@ public class HandleInfoProviderImpl implements HandleInfoProvider, Serializable 
     }
     
     /**
-     * @see HandleInfoRetriever#generateUuidHandle()
+     * @see HandleInfoProvider#generateUuidHandle()
      */
     @Override
     public String generateUuidHandle() {
@@ -105,12 +105,12 @@ public class HandleInfoProviderImpl implements HandleInfoProvider, Serializable 
         
 	UUID uuid = UUID.randomUUID();
 	String randomUUIDString = uuid.toString().toUpperCase();
-	String pid = prefix + "/00-" + randomUUIDString;
+	String pid = prefixWithSlash + randomUUIDString;
 	return pid;
     }
     
     /**
-     * @see HandleInfoRetriever#handleIsValidUuid(java.lang.String)
+     * @see HandleInfoProvider#handleIsValidUuid(java.lang.String)
      */
     @Override
     public boolean handleIsValidUuid(String handle) {
@@ -118,8 +118,8 @@ public class HandleInfoProviderImpl implements HandleInfoProvider, Serializable 
         logger.debug("Checking if handle '{}' is a valid UUID", handle);
         
 	String uuid;
-	String testShortHandlePrefix = HandleConstants.HDL_SHORT_PROXY + prefixWithSlash + "/00-";
-	String testLongHandlePrefix = HandleConstants.HDL_LONG_PROXY + prefixWithSlash + "/00-";
+	String testShortHandlePrefix = HandleConstants.HDL_SHORT_PROXY + ":" + prefixWithSlash;
+	String testLongHandlePrefix = HandleConstants.HDL_LONG_PROXY + prefixWithSlash;
 	try {
 	    if (handle.startsWith(testShortHandlePrefix)) {
 		uuid = handle.replace(testShortHandlePrefix, "");
