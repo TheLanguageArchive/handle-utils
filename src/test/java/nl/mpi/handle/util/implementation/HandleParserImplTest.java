@@ -73,10 +73,7 @@ public class HandleParserImplTest {
         Collection<URI> handles = new ArrayList<>();
         handles.add(URI.create(handleShortPrefix + UUID.randomUUID().toString()));
         handles.add(URI.create(handleLongPrefix + UUID.randomUUID().toString()));
-        handles.add(URI.create(handleSomeOtherShortPrefix + UUID.randomUUID().toString()));
-        handles.add(URI.create(handleSomeOtherLongPrefix + UUID.randomUUID().toString()));
         handles.add(URI.create(prefixWithSlash + UUID.randomUUID().toString()));
-        handles.add(URI.create(someOtherPrefixWithSlash + UUID.randomUUID().toString()));
         
         for(URI handle : handles) {
             boolean result = handleParser.isHandleUri(handle);
@@ -88,6 +85,11 @@ public class HandleParserImplTest {
     public void isNotHandle() {
         
         Collection<URI> notHandles = new ArrayList<>();
+        
+        notHandles.add(URI.create(handleSomeOtherShortPrefix + UUID.randomUUID().toString()));
+        notHandles.add(URI.create(handleSomeOtherLongPrefix + UUID.randomUUID().toString()));
+        notHandles.add(URI.create(someOtherPrefixWithSlash + UUID.randomUUID().toString()));
+        
         notHandles.add(URI.create(UUID.randomUUID().toString()));
         notHandles.add(URI.create("/" + UUID.randomUUID().toString()));
         notHandles.add(URI.create("http://some/other/url.cmdi"));
@@ -133,94 +135,6 @@ public class HandleParserImplTest {
     }
 
     @Test
-    public void handlePrefixIsKnown() {
-        
-        String handleUuid = UUID.randomUUID().toString();
-        String fullHandle = handleShortPrefix + handleUuid;
-        URI handleUri = URI.create(fullHandle);
-        
-        boolean result = handleParser.isHandlePrefixKnown(handleUri);
-        assertTrue("Result should be true (1)", result);
-        
-        
-        fullHandle = handleLongPrefix + handleUuid;
-        handleUri = URI.create(fullHandle);
-        
-        result = handleParser.isHandlePrefixKnown(handleUri);
-        assertTrue("Result should be true (2)", result);
-        
-        
-        fullHandle = prefixWithSlash + handleUuid;
-        handleUri = URI.create(fullHandle);
-        
-        result = handleParser.isHandlePrefixKnown(handleUri);
-        assertTrue("Result should be true (3)", result);
-    }
-    
-    @Test
-    public void handlePrefixIsUnknown() {
-        
-        String handleUuid = UUID.randomUUID().toString();
-        String fullHandle = handleSomeOtherShortPrefix + handleUuid;
-        URI handleUri = URI.create(fullHandle);
-        
-        boolean result = handleParser.isHandlePrefixKnown(handleUri);
-        assertFalse("Result should be false (3)", result);
-        
-        
-        fullHandle = handleSomeOtherLongPrefix + handleUuid;
-        handleUri = URI.create(fullHandle);
-        
-        result = handleParser.isHandlePrefixKnown(handleUri);
-        assertFalse("Result should be false (2)", result);
-        
-        
-        fullHandle = someOtherPrefixWithSlash + handleUuid;
-        handleUri = URI.create(fullHandle);
-        
-        result = handleParser.isHandlePrefixKnown(handleUri);
-        assertFalse("Result should be false (3)", result);
-    }
-    
-    @Test
-    public void handleHasNoPrefix() {
-        String handleUuid = UUID.randomUUID().toString();
-        URI handle = URI.create(handleUuid);
-        String expectedExceptionMessage = "Invalid handle (" + handle + ")";
-        try {
-            handleParser.isHandlePrefixKnown(handle);
-            fail("should have thrown exception");
-        } catch(IllegalArgumentException ex) {
-            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
-        }
-    }
-    
-    @Test
-    public void handleIsEmpty() {
-        
-        URI emptyHandle = URI.create("");
-        String expectedExceptionMessage = "Invalid handle (" + emptyHandle + ")";
-        try {
-            handleParser.isHandlePrefixKnown(emptyHandle);
-            fail("should have thrown exception");
-        } catch(IllegalArgumentException ex) {
-            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
-        }
-    }
-    
-    @Test
-    public void handleIsNull() {
-        
-        String expectedExceptionMessage = "Invalid handle (" + null + ")";
-        try {
-            handleParser.isHandlePrefixKnown(null);
-            fail("should have thrown exception");
-        } catch(IllegalArgumentException ex) {
-            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
-        }
-    }
-    
-    @Test
     public void handlesEqual() {
         
         final String baseHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
@@ -263,10 +177,14 @@ public class HandleParserImplTest {
         final String firstBaseHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
         final URI firstHandle = URI.create(handleShortPrefix + firstBaseHandle);
         final URI secondHandle = URI.create(handleSomeOtherShortPrefix + firstBaseHandle);
+        final String expectedExceptionMessage = "Invalid handle (" + secondHandle + ")";
         
-        boolean result = handleParser.areHandlesEquivalent(firstHandle, secondHandle);
-        
-        assertFalse("Result should have been false", result);
+        try {
+            handleParser.areHandlesEquivalent(firstHandle, secondHandle);
+            fail("should have thrown an exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
     }
     
     @Test
@@ -387,11 +305,14 @@ public class HandleParserImplTest {
         // with a different prefix
         
         initialHandle = URI.create(someOtherPrefixWithSlash + strippedHandle);
-        expectedHandle = URI.create(handleSomeOtherShortPrefix + strippedHandle);
+        final String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
         
-        retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
-        
-        assertEquals("Retrieved handle different from expected (some other prefix)", expectedHandle, retrievedHandle);
+        try {
+            handleParser.prepareHandleWithHdlPrefix(initialHandle);
+            fail("should have thrown an exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
     }
     
     @Test
@@ -408,11 +329,14 @@ public class HandleParserImplTest {
         // with a different prefix
         
         initialHandle = URI.create(handleSomeOtherShortPrefix + strippedHandle);
-        expectedHandle = initialHandle;
+        final String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
         
-        retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
-        
-        assertEquals("Retrieved handle different from expected (some other prefix)", expectedHandle, retrievedHandle);
+        try {
+            handleParser.prepareHandleWithHdlPrefix(initialHandle);
+            fail("should have thrown an exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
     }
     
     @Test
@@ -429,11 +353,14 @@ public class HandleParserImplTest {
         // with a different prefix
         
         initialHandle = URI.create(handleSomeOtherLongPrefix + strippedHandle);
-        expectedHandle = URI.create(handleSomeOtherShortPrefix + strippedHandle);
+        final String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
         
-        retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
-        
-        assertEquals("Retrieved handle different from expected (some other prefix)", expectedHandle, retrievedHandle);
+        try {
+            handleParser.prepareHandleWithHdlPrefix(initialHandle);
+            fail("should have thrown an exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
     }
     
     @Test
@@ -541,44 +468,45 @@ public class HandleParserImplTest {
     @Test
     public void stripHandleStartingWithHandleSomeOtherLongPrefix() {
         
-        // since the handle starts with an unknown prefix (but with a valid proxy), it doesn't strip the prefix,
-        //  otherwise it could match one of "our" handles
-        
         final String handleUuid = UUID.randomUUID().toString();
-        final String handleWithJustPrefix = someOtherPrefixWithSlash + handleUuid;
         final URI fullHandle = URI.create(handleSomeOtherLongPrefix + handleUuid);
+        String expectedExceptionMessage = "Invalid handle (" + fullHandle + ")";
         
-        String result = handleParser.stripHandleIfPrefixIsKnown(fullHandle);
-        
-        assertEquals("Stripped handle different from expected", handleWithJustPrefix, result);
+        try {
+            handleParser.stripHandleIfPrefixIsKnown(fullHandle);
+            fail("should have thrown an exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
     }
     
     @Test
     public void stripHandleStartingWithHandleSomeOtherShortPrefix() {
         
-        // since the handle starts with an unknown prefix (but with a valid proxy), it doesn't strip the prefix,
-        //  otherwise it could match one of "our" handles
-        
         final String handleUuid = UUID.randomUUID().toString();
-        final String handleWithJustPrefix = someOtherPrefixWithSlash + handleUuid;
         final URI fullHandle = URI.create(handleSomeOtherShortPrefix + handleUuid);
+        String expectedExceptionMessage = "Invalid handle (" + fullHandle + ")";
         
-        String result = handleParser.stripHandleIfPrefixIsKnown(fullHandle);
-        
-        assertEquals("Stripped handle different from expected", handleWithJustPrefix, result);
+        try {
+            handleParser.stripHandleIfPrefixIsKnown(fullHandle);
+            fail("should have thrown an exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
     }
     
     @Test
     public void stripHandleStartingWithJustSomeOtherPrefix() {
         
-        // since the handle starts with an unknown prefix (but with a valid proxy), it doesn't strip the prefix,
-        //  otherwise it could match one of "our" handles
-        
         final String handleUuid = UUID.randomUUID().toString();
         final URI fullHandle = URI.create("blabla/" + handleUuid);
+        String expectedExceptionMessage = "Invalid handle (" + fullHandle + ")";
         
-        String result = handleParser.stripHandleIfPrefixIsKnown(fullHandle);
-        
-        assertEquals("Stripped handle different from expected", fullHandle.toString(), result);
+        try {
+            handleParser.stripHandleIfPrefixIsKnown(fullHandle);
+            fail("should have thrown an exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
     }
 }

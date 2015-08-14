@@ -28,7 +28,7 @@ public interface HandleParser {
      * Adapted from the HandleUtil class in the Metadata API.
      * @param handleUri
      * @return true if handleUri is composed of a known proxy and
-     *  matches the expected handle pattern
+     *  matches the expected handle pattern, including the known prefix
      */
     public boolean isHandleUri(URI handleUri);
     
@@ -38,13 +38,6 @@ public interface HandleParser {
      * ("hdl:" or "http://hdl.handle.net/").
      */
     public boolean startsWithKnownHandleProxy(URI uri);
-
-    /**
-     * @param handleUri
-     * @return true if handle starts with the known prefix
-     * @throws IllegalArgumentException if the handle is not valid
-     */
-    public boolean isHandlePrefixKnown(URI handleUri);
     
     /**
      * Checks if the given handles are equivalent, by stripping them of eventual
@@ -68,7 +61,7 @@ public interface HandleParser {
     
     /**
      * Strips a handle of its prefixes.
-     * If the prefix is unknown, it will be untouched.
+     * If the prefix is unknown, it will be considered an invalid handle.
      * @param handle
      * @return stripped handle, or null if an empty or null handle is passed
      * @throws IllegalArgumentException if the handle is not valid
