@@ -31,14 +31,18 @@ public class HandleParserImpl implements HandleParser, Serializable {
     private static final Logger logger = LoggerFactory.getLogger(HandleParserImpl.class);
     
     private final String completeHdlProxy;
+    private final String completeLongHdlProxy;
     private final String prefixWithSlash;
     private final String completeHdlPrefix;
+    private final String completeLongHdlPrefix;
     
     
     public HandleParserImpl(String prefix) {
         prefixWithSlash = prefix + "/";
         completeHdlProxy = HandleConstants.HDL_SHORT_PROXY + ":";
         completeHdlPrefix = completeHdlProxy + prefixWithSlash;
+        completeLongHdlProxy = HandleConstants.HDL_LONG_PROXY;
+        completeLongHdlPrefix = completeLongHdlProxy + prefixWithSlash;
     }
     
     
@@ -102,6 +106,25 @@ public class HandleParserImpl implements HandleParser, Serializable {
 
         logger.debug("Prepared handle: {}", handleWithHdlPrefix);
         return handleWithHdlPrefix;
+    }
+
+    /**
+     * @see HandleParser#prepareHandleWithLongHdlPrefix(java.net.URI)
+     */
+    @Override
+    public URI prepareHandleWithLongHdlPrefix(URI handleToPrepare) {
+        
+        logger.debug("Preparing handle '{}' with long hdl prefix", handleToPrepare);
+        
+        assureHandleIsValid(handleToPrepare);
+
+        String strippedHandle = stripHandleIfPrefixIsKnown(handleToPrepare);
+
+        URI handleWithLongHdlPrefix = URI.create(isHandlePrefixKnown(strippedHandle) || !strippedHandle.contains("/") ? 
+            completeLongHdlPrefix + strippedHandle : completeLongHdlProxy + strippedHandle);
+
+        logger.debug("Prepared handle: {}", handleWithLongHdlPrefix);
+        return handleWithLongHdlPrefix;
     }
     
     /**

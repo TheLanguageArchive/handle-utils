@@ -51,13 +51,22 @@ public interface HandleParser {
     public boolean areHandlesEquivalent(URI aHandleUri, URI anotherHandleUri);
         
     /**
-     * Adds the appropriate prefix to the given handle, if necessary.
+     * Adds the appropriate prefix ("hdl:") to the given handle, if necessary.
      * 
      * @param handleToPrepare handle which may or may not have already the prefix
      * @return handle with the appropriate prefix, or null if an empty or null handle is passed
      * @throws IllegalArgumentException if the handle is not valid
      */
     public URI prepareHandleWithHdlPrefix(URI handleToPrepare);
+    
+    /**
+     * Adds the long prefix ("http://hdl.handle.net/") to the given handle, if necessary.
+     * 
+     * @param handleToPrepare handle which may or may not have already the prefix
+     * @return handle with the long prefix, or null if an empty or null handle is passed
+     * @throws IllegalArgumentException if the handle is not valid
+     */
+    public URI prepareHandleWithLongHdlPrefix(URI handleToPrepare);
     
     /**
      * Strips a handle of its prefixes.
