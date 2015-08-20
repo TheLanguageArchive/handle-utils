@@ -4,7 +4,7 @@
 
     <groupId>nl.mpi</groupId>
     <artifactId>handle-utils</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
 
     <parent>
@@ -38,23 +38,7 @@
 	</repository>
     </distributionManagement>
 
-<!--
-
-    <licenses>
-        <license>
-            <name>Revised BSD License</name>
-            <url>
-                http://en.wikipedia.org/wiki/BSD_licenses#3-clause_license_.28.22Revised_BSD_License.22.2C_.22New_BSD_License.22.2C_or_.22Modified_BSD_License.22.29
-            </url>
-            <comments>s. license.txt</comments>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
--->
-
-
-
-<build>
+    <build>
 	<plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -140,12 +124,6 @@
 	    <version>${mpi.parent.slf4j.version}</version>
 	    <scope>test</scope>
 	</dependency>
-        
-<!--        <dependency>
-            <groupId>net.handle</groupId>
-            <artifactId>handle</artifactId>
-            <version>6.1</version>
-        </dependency>-->
         
         <dependency>
             <groupId>net.handle</groupId>
