@@ -76,7 +76,7 @@ public class HandleParserImplTest {
         handles.add(URI.create(prefixWithSlash + UUID.randomUUID().toString()));
         
         for(URI handle : handles) {
-            boolean result = handleParser.isHandleUri(handle);
+            boolean result = handleParser.isHandleUriWithKnownPrefix(handle);
             assertTrue("Result should be true (" + handle + ")", result);
         }
     }
@@ -97,7 +97,7 @@ public class HandleParserImplTest {
         notHandles.add(null);
         
         for(URI notHandle : notHandles) {
-            boolean result = handleParser.isHandleUri(notHandle);
+            boolean result = handleParser.isHandleUriWithKnownPrefix(notHandle);
             assertFalse("Result should be true (" + notHandle + ")", result);
         }
     }
@@ -245,7 +245,7 @@ public class HandleParserImplTest {
         
         try {
             handleParser.prepareHandleWithHdlPrefix(emptyHandle);
-            fail("should have thrown an exception");
+            fail("should have thrown an exception (empty handle - 1)");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
         }
@@ -256,7 +256,32 @@ public class HandleParserImplTest {
         
         try {
             handleParser.prepareHandleWithHdlPrefix(null);
-            fail("should have thrown an exception");
+            fail("should have thrown an exception (null handle - 1)");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+        
+
+        // PREPARE AND VALIDATE
+
+        // empty handle
+        
+        expectedExceptionMessage = "Invalid handle (" + emptyHandle + ")";
+        
+        try {
+            handleParser.prepareAndValidateHandleWithHdlPrefix(emptyHandle);
+            fail("should have thrown an exception (empty handle - 2)");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+        
+        // null handle
+        
+        expectedExceptionMessage = "Invalid handle (" + null + ")";
+        
+        try {
+            handleParser.prepareAndValidateHandleWithHdlPrefix(null);
+            fail("should have thrown an exception (null handle - 2)");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
         }
@@ -267,13 +292,13 @@ public class HandleParserImplTest {
         
         // without prefix
         
-        final String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
+        String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
         URI initialHandle = URI.create(strippedHandle);
         String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
         
         try {
             handleParser.prepareHandleWithHdlPrefix(initialHandle);
-            fail("should have thrown an exception");
+            fail("should have thrown an exception (no prefix - 1)");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
         }
@@ -285,7 +310,34 @@ public class HandleParserImplTest {
         
         try {
             handleParser.prepareHandleWithHdlPrefix(initialHandle);
-            fail("should have thrown an exception");
+            fail("should have thrown an exception (slash - 1)");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+        
+        
+        //PREPARE AND VALIDATE
+        
+        // without prefix
+        
+        initialHandle = URI.create(strippedHandle);
+        expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
+        
+        try {
+            handleParser.prepareAndValidateHandleWithHdlPrefix(initialHandle);
+            fail("should have thrown an exception (no prefix - 2)");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+        
+        // with just a slash in the beginning
+        
+        initialHandle = URI.create("/" + strippedHandle);
+        expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
+        
+        try {
+            handleParser.prepareAndValidateHandleWithHdlPrefix(initialHandle);
+            fail("should have thrown an exception (slash - 2)");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
         }
@@ -294,7 +346,7 @@ public class HandleParserImplTest {
     @Test
     public void prepareHandleContainingJustPrefix() {
         
-        final String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
+        String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
         URI initialHandle = URI.create(prefixWithSlash + strippedHandle);
         URI expectedHandle = URI.create(handleShortPrefix + strippedHandle);
         
@@ -305,10 +357,29 @@ public class HandleParserImplTest {
         // with a different prefix
         
         initialHandle = URI.create(someOtherPrefixWithSlash + strippedHandle);
+        expectedHandle = URI.create(handleSomeOtherShortPrefix + strippedHandle);
+        
+        retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
+        
+        assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
+        
+        
+        // PREPARE AND VALIDATE
+        
+        initialHandle = URI.create(prefixWithSlash + strippedHandle);
+        expectedHandle = URI.create(handleShortPrefix + strippedHandle);
+        
+        retrievedHandle = handleParser.prepareAndValidateHandleWithHdlPrefix(initialHandle);
+        
+        assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
+        
+        // with a different prefix
+        
+        initialHandle = URI.create(someOtherPrefixWithSlash + strippedHandle);
         final String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
         
         try {
-            handleParser.prepareHandleWithHdlPrefix(initialHandle);
+            handleParser.prepareAndValidateHandleWithHdlPrefix(initialHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -318,7 +389,7 @@ public class HandleParserImplTest {
     @Test
     public void prepareHandleContainingHdlPrefix() {
         
-        final String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
+        String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
         URI initialHandle = URI.create(handleShortPrefix + strippedHandle);
         URI expectedHandle = initialHandle;
         
@@ -329,10 +400,29 @@ public class HandleParserImplTest {
         // with a different prefix
         
         initialHandle = URI.create(handleSomeOtherShortPrefix + strippedHandle);
+        expectedHandle = initialHandle;
+        
+        retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
+        
+        assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
+        
+        
+        // PREPARE AND VALIDATE
+        
+        initialHandle = URI.create(handleShortPrefix + strippedHandle);
+        expectedHandle = initialHandle;
+        
+        retrievedHandle = handleParser.prepareAndValidateHandleWithHdlPrefix(initialHandle);
+        
+        assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
+        
+        // with a different prefix
+        
+        initialHandle = URI.create(handleSomeOtherShortPrefix + strippedHandle);
         final String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
         
         try {
-            handleParser.prepareHandleWithHdlPrefix(initialHandle);
+            handleParser.prepareAndValidateHandleWithHdlPrefix(initialHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -342,7 +432,7 @@ public class HandleParserImplTest {
     @Test
     public void prepareHandleContainingFullPrefix() {
         
-        final String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
+        String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
         URI initialHandle = URI.create(handleLongPrefix + strippedHandle);
         URI expectedHandle = URI.create(handleShortPrefix + strippedHandle);
         
@@ -353,10 +443,29 @@ public class HandleParserImplTest {
         // with a different prefix
         
         initialHandle = URI.create(handleSomeOtherLongPrefix + strippedHandle);
+        expectedHandle = URI.create(handleSomeOtherShortPrefix + strippedHandle);
+        
+        retrievedHandle = handleParser.prepareHandleWithHdlPrefix(initialHandle);
+        
+        assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
+        
+        
+        // PREPARE AND VALIDATE
+        
+        initialHandle = URI.create(handleLongPrefix + strippedHandle);
+        expectedHandle = URI.create(handleShortPrefix + strippedHandle);
+        
+        retrievedHandle = handleParser.prepareAndValidateHandleWithHdlPrefix(initialHandle);
+        
+        assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
+        
+        // with a different prefix
+        
+        initialHandle = URI.create(handleSomeOtherLongPrefix + strippedHandle);
         final String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
         
         try {
-            handleParser.prepareHandleWithHdlPrefix(initialHandle);
+            handleParser.prepareAndValidateHandleWithHdlPrefix(initialHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -366,19 +475,29 @@ public class HandleParserImplTest {
     @Test
     public void prepareNotAHandle() {
         
-        final URI notAHandle = URI.create("https://some/location/node.cmdi");
-        final String expectedExceptionMessage = "Invalid handle (" + notAHandle + ")";
+        URI notAHandle = URI.create("https://some/location/node.cmdi");
+        String expectedExceptionMessage = "Invalid handle (" + notAHandle + ")";
         
         try {
             handleParser.prepareHandleWithHdlPrefix(notAHandle);
-            fail("should have thrown an exception");
+            fail("should have thrown an exception (not a handle - 1)");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+        
+        
+        // PREPARE AND VALIDATE
+        
+        try {
+            handleParser.prepareAndValidateHandleWithHdlPrefix(notAHandle);
+            fail("should have thrown an exception (not a handle - 2)");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
         }
     }
     
     @Test
-    public void prepare_Long_EmptyOrNullHandle() {
+    public void prepareAndValidate_Long_EmptyOrNullHandle() {
         
         // empty handle
         
@@ -386,7 +505,7 @@ public class HandleParserImplTest {
         String expectedExceptionMessage = "Invalid handle (" + emptyHandle + ")";
         
         try {
-            handleParser.prepareHandleWithLongHdlPrefix(emptyHandle);
+            handleParser.prepareAndValidateHandleWithLongHdlPrefix(emptyHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -397,7 +516,7 @@ public class HandleParserImplTest {
         expectedExceptionMessage = "Invalid handle (" + null + ")";
         
         try {
-            handleParser.prepareHandleWithLongHdlPrefix(null);
+            handleParser.prepareAndValidateHandleWithLongHdlPrefix(null);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -405,7 +524,7 @@ public class HandleParserImplTest {
     }
     
     @Test
-    public void prepare_Long_HandleContainingNoPrefix() {
+    public void prepareAndValidate_Long_HandleContainingNoPrefix() {
         
         // without prefix
         
@@ -414,7 +533,7 @@ public class HandleParserImplTest {
         String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
         
         try {
-            handleParser.prepareHandleWithLongHdlPrefix(initialHandle);
+            handleParser.prepareAndValidateHandleWithLongHdlPrefix(initialHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -426,7 +545,7 @@ public class HandleParserImplTest {
         expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
         
         try {
-            handleParser.prepareHandleWithLongHdlPrefix(initialHandle);
+            handleParser.prepareAndValidateHandleWithLongHdlPrefix(initialHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -434,13 +553,13 @@ public class HandleParserImplTest {
     }
     
     @Test
-    public void prepare_Long_HandleContainingJustPrefix() {
+    public void prepareAndValidate_Long_HandleContainingJustPrefix() {
         
         final String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
         URI initialHandle = URI.create(prefixWithSlash + strippedHandle);
         URI expectedHandle = URI.create(handleLongPrefix + strippedHandle);
         
-        URI retrievedHandle = handleParser.prepareHandleWithLongHdlPrefix(initialHandle);
+        URI retrievedHandle = handleParser.prepareAndValidateHandleWithLongHdlPrefix(initialHandle);
         
         assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
         
@@ -450,7 +569,7 @@ public class HandleParserImplTest {
         final String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
         
         try {
-            handleParser.prepareHandleWithLongHdlPrefix(initialHandle);
+            handleParser.prepareAndValidateHandleWithLongHdlPrefix(initialHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -458,13 +577,13 @@ public class HandleParserImplTest {
     }
     
     @Test
-    public void prepare_Long_HandleContainingHdlPrefix() {
+    public void prepareAndValidate_Long_HandleContainingHdlPrefix() {
         
         final String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
         URI initialHandle = URI.create(handleShortPrefix + strippedHandle);
         URI expectedHandle = URI.create(handleLongPrefix + strippedHandle);
         
-        URI retrievedHandle = handleParser.prepareHandleWithLongHdlPrefix(initialHandle);
+        URI retrievedHandle = handleParser.prepareAndValidateHandleWithLongHdlPrefix(initialHandle);
         
         assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
         
@@ -474,7 +593,7 @@ public class HandleParserImplTest {
         final String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
         
         try {
-            handleParser.prepareHandleWithLongHdlPrefix(initialHandle);
+            handleParser.prepareAndValidateHandleWithLongHdlPrefix(initialHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -482,13 +601,13 @@ public class HandleParserImplTest {
     }
     
     @Test
-    public void prepare_Long_HandleContainingFullPrefix() {
+    public void prepareAndValidate_Long_HandleContainingFullPrefix() {
         
         final String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
         URI initialHandle = URI.create(handleLongPrefix + strippedHandle);
         URI expectedHandle = initialHandle;
         
-        URI retrievedHandle = handleParser.prepareHandleWithLongHdlPrefix(initialHandle);
+        URI retrievedHandle = handleParser.prepareAndValidateHandleWithLongHdlPrefix(initialHandle);
         
         assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
         
@@ -498,7 +617,7 @@ public class HandleParserImplTest {
         final String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
         
         try {
-            handleParser.prepareHandleWithLongHdlPrefix(initialHandle);
+            handleParser.prepareAndValidateHandleWithLongHdlPrefix(initialHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -506,13 +625,13 @@ public class HandleParserImplTest {
     }
     
     @Test
-    public void prepare_Long_NotAHandle() {
+    public void prepareAndValidate_Long_NotAHandle() {
         
         final URI notAHandle = URI.create("https://some/location/node.cmdi");
         final String expectedExceptionMessage = "Invalid handle (" + notAHandle + ")";
         
         try {
-            handleParser.prepareHandleWithLongHdlPrefix(notAHandle);
+            handleParser.prepareAndValidateHandleWithLongHdlPrefix(notAHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -520,7 +639,7 @@ public class HandleParserImplTest {
     }
     
     @Test
-    public void stripEmptyOrNullHandle() {
+    public void stripAndValidate_EmptyOrNullHandle() {
         
         // empty handle
         
@@ -528,7 +647,7 @@ public class HandleParserImplTest {
         String expectedExceptionMessage = "Invalid handle (" + emptyHandle + ")";
         
         try {
-            handleParser.stripHandleIfPrefixIsKnown(emptyHandle);
+            handleParser.stripAndValidateHandleIfPrefixIsKnown(emptyHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -538,7 +657,7 @@ public class HandleParserImplTest {
         expectedExceptionMessage = "Invalid handle (" + null + ")";
         
         try {
-            handleParser.stripHandleIfPrefixIsKnown(null);
+            handleParser.stripAndValidateHandleIfPrefixIsKnown(null);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -546,40 +665,40 @@ public class HandleParserImplTest {
     }
     
     @Test
-    public void stripHandleStartingWithHandleLongPrefix() {
+    public void stripAndValidate_HandleStartingWithHandleLongPrefix() {
         
         final String handleUuid = UUID.randomUUID().toString();
         final URI fullHandle = URI.create(handleLongPrefix + handleUuid);
         
-        String result = handleParser.stripHandleIfPrefixIsKnown(fullHandle);
+        String result = handleParser.stripAndValidateHandleIfPrefixIsKnown(fullHandle);
         
         assertEquals("Stripped handle different from expected", handleUuid, result);
     }
     
     @Test
-    public void stripHandleStartingWithHandleShortPrefix() {
+    public void stripAndValidate_HandleStartingWithHandleShortPrefix() {
         
         final String handleUuid = UUID.randomUUID().toString();
         final URI fullHandle = URI.create(handleShortPrefix + handleUuid);
         
-        String result = handleParser.stripHandleIfPrefixIsKnown(fullHandle);
+        String result = handleParser.stripAndValidateHandleIfPrefixIsKnown(fullHandle);
         
         assertEquals("Stripped handle different from expected", handleUuid, result);
     }
     
     @Test
-    public void stripHandleStartingWithJustPrefix() {
+    public void stripAndValidate_HandleStartingWithJustPrefix() {
         
         final String handleUuid = UUID.randomUUID().toString();
         final URI fullHandle = URI.create(prefixWithSlash + handleUuid);
         
-        String result = handleParser.stripHandleIfPrefixIsKnown(fullHandle);
+        String result = handleParser.stripAndValidateHandleIfPrefixIsKnown(fullHandle);
         
         assertEquals("Stripped handle different from expected", handleUuid, result);
     }
     
     @Test
-    public void stripHandleWithoutPrefix() {
+    public void stripAndValidate_HandleWithoutPrefix() {
         
         // without prefix
         
@@ -588,7 +707,7 @@ public class HandleParserImplTest {
         String expectedExceptionMessage = "Invalid handle (" + handle + ")";
         
         try {
-            handleParser.stripHandleIfPrefixIsKnown(handle);
+            handleParser.stripAndValidateHandleIfPrefixIsKnown(handle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -600,7 +719,7 @@ public class HandleParserImplTest {
         expectedExceptionMessage = "Invalid handle (" + handleWithJustSlash + ")";
         
         try {
-            handleParser.stripHandleIfPrefixIsKnown(handleWithJustSlash);
+            handleParser.stripAndValidateHandleIfPrefixIsKnown(handleWithJustSlash);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -608,14 +727,14 @@ public class HandleParserImplTest {
     }
     
     @Test
-    public void stripHandleStartingWithHandleSomeOtherLongPrefix() {
+    public void stripAndValidate_HandleStartingWithHandleSomeOtherLongPrefix() {
         
         final String handleUuid = UUID.randomUUID().toString();
         final URI fullHandle = URI.create(handleSomeOtherLongPrefix + handleUuid);
         String expectedExceptionMessage = "Invalid handle (" + fullHandle + ")";
         
         try {
-            handleParser.stripHandleIfPrefixIsKnown(fullHandle);
+            handleParser.stripAndValidateHandleIfPrefixIsKnown(fullHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -623,14 +742,14 @@ public class HandleParserImplTest {
     }
     
     @Test
-    public void stripHandleStartingWithHandleSomeOtherShortPrefix() {
+    public void stripAndValidate_HandleStartingWithHandleSomeOtherShortPrefix() {
         
         final String handleUuid = UUID.randomUUID().toString();
         final URI fullHandle = URI.create(handleSomeOtherShortPrefix + handleUuid);
         String expectedExceptionMessage = "Invalid handle (" + fullHandle + ")";
         
         try {
-            handleParser.stripHandleIfPrefixIsKnown(fullHandle);
+            handleParser.stripAndValidateHandleIfPrefixIsKnown(fullHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
@@ -638,14 +757,14 @@ public class HandleParserImplTest {
     }
     
     @Test
-    public void stripHandleStartingWithJustSomeOtherPrefix() {
+    public void stripAndValidate_HandleStartingWithJustSomeOtherPrefix() {
         
         final String handleUuid = UUID.randomUUID().toString();
         final URI fullHandle = URI.create("blabla/" + handleUuid);
         String expectedExceptionMessage = "Invalid handle (" + fullHandle + ")";
         
         try {
-            handleParser.stripHandleIfPrefixIsKnown(fullHandle);
+            handleParser.stripAndValidateHandleIfPrefixIsKnown(fullHandle);
             fail("should have thrown an exception");
         } catch(IllegalArgumentException ex) {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());

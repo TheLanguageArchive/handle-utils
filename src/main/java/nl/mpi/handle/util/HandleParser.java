@@ -30,7 +30,7 @@ public interface HandleParser {
      * @return true if handleUri is composed of a known proxy and
      *  matches the expected handle pattern, including the known prefix
      */
-    public boolean isHandleUri(URI handleUri);
+    public boolean isHandleUriWithKnownPrefix(URI handleUri);
     
     /**
      * @param uri
@@ -49,7 +49,7 @@ public interface HandleParser {
      * @throws IllegalArgumentException if any of the handles is not valid
      */
     public boolean areHandlesEquivalent(URI aHandleUri, URI anotherHandleUri);
-        
+    
     /**
      * Adds the appropriate prefix ("hdl:") to the given handle, if necessary.
      * 
@@ -60,20 +60,31 @@ public interface HandleParser {
     public URI prepareHandleWithHdlPrefix(URI handleToPrepare);
     
     /**
+     * Adds the appropriate prefix ("hdl:") to the given handle, if necessary.
+     * This method also makes sure the handle is valid and uses a known prefix.
+     * 
+     * @param handleToPrepare handle which may or may not have already the prefix
+     * @return handle with the appropriate prefix, or null if an empty or null handle is passed
+     * @throws IllegalArgumentException if the handle is not valid and has an unknown prefix
+     */
+    public URI prepareAndValidateHandleWithHdlPrefix(URI handleToPrepare);
+    
+    /**
      * Adds the long prefix ("http://hdl.handle.net/") to the given handle, if necessary.
+     * This method also makes sure the handle is valid and uses a known prefix.
      * 
      * @param handleToPrepare handle which may or may not have already the prefix
      * @return handle with the long prefix, or null if an empty or null handle is passed
-     * @throws IllegalArgumentException if the handle is not valid
+     * @throws IllegalArgumentException if the handle is not valid and has an unknown prefix
      */
-    public URI prepareHandleWithLongHdlPrefix(URI handleToPrepare);
+    public URI prepareAndValidateHandleWithLongHdlPrefix(URI handleToPrepare);
     
     /**
      * Strips a handle of its prefixes.
      * If the prefix is unknown, it will be considered an invalid handle.
      * @param handle
      * @return stripped handle, or null if an empty or null handle is passed
-     * @throws IllegalArgumentException if the handle is not valid
+     * @throws IllegalArgumentException if the handle is not valid and has an unknown prefix
      */
-    public String stripHandleIfPrefixIsKnown(URI handle);
+    public String stripAndValidateHandleIfPrefixIsKnown(URI handle);
 }

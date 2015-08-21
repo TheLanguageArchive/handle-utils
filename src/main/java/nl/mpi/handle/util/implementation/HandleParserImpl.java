@@ -47,14 +47,14 @@ public class HandleParserImpl implements HandleParser, Serializable {
     
     
     /**
-     * @see HandleParser#isHandleUri(java.net.URI)
+     * @see HandleParser#isHandleUriWithKnownPrefix(java.net.URI)
      */
     @Override
-    public boolean isHandleUri(URI handleUri) {
+    public boolean isHandleUriWithKnownPrefix(URI handleUri) {
         
 	return handleUri != null
-                && ( (startsWithKnownHandleProxy(handleUri) && isHandle(handleUri.toString()))
-                    || isHandle(handleUri.toString()) );
+                && ( (startsWithKnownHandleProxy(handleUri) && isHandleWithKnownPrefix(handleUri.toString()))
+                    || isHandleWithKnownPrefix(handleUri.toString()) );
     }
     
     /**
@@ -80,75 +80,79 @@ public class HandleParserImpl implements HandleParser, Serializable {
         
         logger.debug("Checking if handles '{}' and '{}' are equivalent", aHandleUri, anotherHandleUri);
 
-        assureHandleIsValid(aHandleUri);
-        assureHandleIsValid(anotherHandleUri);
+//        assureHandleIsValid(aHandleUri);
+//        assureHandleIsValid(anotherHandleUri);
         
-        String aStrippedHandle = stripHandleIfPrefixIsKnown(aHandleUri);
-        String anotherStrippedHandle = stripHandleIfPrefixIsKnown(anotherHandleUri);
+        String aStrippedHandle = stripAndValidateHandleIfPrefixIsKnown(aHandleUri);
+        String anotherStrippedHandle = stripAndValidateHandleIfPrefixIsKnown(anotherHandleUri);
 
         return aStrippedHandle.equals(anotherStrippedHandle);
     }
-    
+
     /**
      * @see HandleParser#prepareHandleWithHdlPrefix(java.net.URI)
      */
     @Override
     public URI prepareHandleWithHdlPrefix(URI handleToPrepare) {
-
+        
         logger.debug("Preparing handle '{}' with hdl prefix", handleToPrepare);
         
-        assureHandleIsValid(handleToPrepare);
-
-        String strippedHandle = stripHandleIfPrefixIsKnown(handleToPrepare);
-
-        URI handleWithHdlPrefix = URI.create(isHandlePrefixKnown(strippedHandle) || !strippedHandle.contains("/") ? 
-            completeHdlPrefix + strippedHandle : completeHdlProxy + strippedHandle);
-
-        logger.debug("Prepared handle: {}", handleWithHdlPrefix);
-        return handleWithHdlPrefix;
-    }
-
-    /**
-     * @see HandleParser#prepareHandleWithLongHdlPrefix(java.net.URI)
-     */
-    @Override
-    public URI prepareHandleWithLongHdlPrefix(URI handleToPrepare) {
+        assureHandleIsNotNullOrEmpty(handleToPrepare);
+        if(!matchesHandlePattern(handleToPrepare.toString())) {
+            throw new IllegalArgumentException("Invalid handle (" + handleToPrepare + ")");
+        }
         
-        logger.debug("Preparing handle '{}' with long hdl prefix", handleToPrepare);
-        
-        assureHandleIsValid(handleToPrepare);
+        String strippedHandle;
+        if(isHandlePrefixKnown(handleToPrepare.toString())) {
+            strippedHandle = stripHandleIfPrefixIsKnown(handleToPrepare);
+        } else {
+            strippedHandle = getHandleWithoutProxy(handleToPrepare.toString());
+        }
 
-        String strippedHandle = stripHandleIfPrefixIsKnown(handleToPrepare);
-
-        URI handleWithLongHdlPrefix = URI.create(isHandlePrefixKnown(strippedHandle) || !strippedHandle.contains("/") ? 
-            completeLongHdlPrefix + strippedHandle : completeLongHdlProxy + strippedHandle);
-
-        logger.debug("Prepared handle: {}", handleWithLongHdlPrefix);
-        return handleWithLongHdlPrefix;
+        return prepareHandle(strippedHandle, completeHdlPrefix, completeHdlProxy);
     }
     
     /**
-     * @see HandleParser#stripHandleIfPrefixIsKnown(java.net.URI)
+     * @see HandleParser#prepareAndValidateHandleWithHdlPrefix(java.net.URI)
      */
     @Override
-    public String stripHandleIfPrefixIsKnown(URI handle) {
+    public URI prepareAndValidateHandleWithHdlPrefix(URI handleToPrepare) {
+
+        logger.debug("Preparing (and validating) handle '{}' with hdl prefix", handleToPrepare);
         
-        logger.debug("Stripping handle: {}", handle);
+//        assureHandleIsValid(handleToPrepare);
+        
+        String strippedHandle = stripAndValidateHandleIfPrefixIsKnown(handleToPrepare);
+
+        return prepareHandle(strippedHandle, completeHdlPrefix, completeHdlProxy);
+    }
+
+    /**
+     * @see HandleParser#prepareAndValidateHandleWithLongHdlPrefix(java.net.URI)
+     */
+    @Override
+    public URI prepareAndValidateHandleWithLongHdlPrefix(URI handleToPrepare) {
+        
+        logger.debug("Preparing (and validating) handle '{}' with long hdl prefix", handleToPrepare);
+        
+//        assureHandleIsValid(handleToPrepare);
+        
+        String strippedHandle = stripAndValidateHandleIfPrefixIsKnown(handleToPrepare);
+        
+        return prepareHandle(strippedHandle, completeLongHdlPrefix, completeLongHdlProxy);
+    }
+    
+    /**
+     * @see HandleParser#stripAndValidateHandleIfPrefixIsKnown(java.net.URI)
+     */
+    @Override
+    public String stripAndValidateHandleIfPrefixIsKnown(URI handle) {
+        
+        logger.debug("Stripping (and validating) handle: {}", handle);
         
         assureHandleIsValid(handle);
-
-        String handleWithoutProxy = getHandleWithoutProxy(handle.toString());
         
-        logger.debug("Removed proxy from handle: {}", handleWithoutProxy);
-        
-        if(handleWithoutProxy.startsWith(prefixWithSlash)) {
-            String handleWithoutPrefix = handleWithoutProxy.replace(prefixWithSlash, "");
-            logger.debug("Removed known prefix from handle: {}", handleWithoutPrefix);
-            return handleWithoutPrefix;
-        } else {
-            logger.debug("Kept unknown prefix in handle: {}", handleWithoutProxy);
-            return handleWithoutProxy;
-        }
+        return stripHandleIfPrefixIsKnown(handle);
     }
     
     
@@ -176,14 +180,50 @@ public class HandleParserImpl implements HandleParser, Serializable {
         }
     }
     
-    private boolean isHandle(String handleString) {
+    private boolean matchesHandlePattern(String handleString) {
+        return HandleConstants.HANDLE_PATTERN.matcher(getHandleWithoutProxy(handleString)).matches();
+    }
+    
+    private boolean isHandleWithKnownPrefix(String handleString) {
         return isHandlePrefixKnown(getHandleWithoutProxy(handleString)) &&
-                HandleConstants.HANDLE_PATTERN.matcher(getHandleWithoutProxy(handleString)).matches();
+                matchesHandlePattern(handleString);
+                
+    }
+    
+    private void assureHandleIsNotNullOrEmpty(URI possibleHandle) {
+        if(possibleHandle == null || possibleHandle.toString().trim().isEmpty()) {
+            throw new IllegalArgumentException("Invalid handle (" + possibleHandle + ")");
+        }
     }
     
     private void assureHandleIsValid(URI possibleHandle) {
-        if(possibleHandle == null || possibleHandle.toString().trim().isEmpty() || !isHandleUri(possibleHandle)) {
+        assureHandleIsNotNullOrEmpty(possibleHandle);
+        if(!isHandleUriWithKnownPrefix(possibleHandle)) {
             throw new IllegalArgumentException("Invalid handle (" + possibleHandle + ")");
         }
+    }
+    
+    private String stripHandleIfPrefixIsKnown(URI handle) {
+        String handleWithoutProxy = getHandleWithoutProxy(handle.toString());
+        
+        logger.debug("Removed proxy from handle: {}", handleWithoutProxy);
+        
+        if(handleWithoutProxy.startsWith(prefixWithSlash)) {
+            String handleWithoutPrefix = handleWithoutProxy.replace(prefixWithSlash, "");
+            logger.debug("Removed known prefix from handle: {}", handleWithoutPrefix);
+            return handleWithoutPrefix;
+        } else {
+            logger.debug("Kept unknown prefix in handle: {}", handleWithoutProxy);
+            return handleWithoutProxy;
+        }
+    }
+    
+    private URI prepareHandle(String strippedHandle, String completePrefixToAdd, String completeProxyToAdd) {
+        
+        URI handleWithHdlPrefix = URI.create(isHandlePrefixKnown(strippedHandle) || !strippedHandle.contains("/") ? 
+            completePrefixToAdd + strippedHandle : completeProxyToAdd + strippedHandle);
+
+        logger.debug("Prepared handle: {}", handleWithHdlPrefix);
+        return handleWithHdlPrefix;
     }
 }
