@@ -770,4 +770,17 @@ public class HandleParserImplTest {
             assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
         }
     }
+
+    @Test
+    public void getHandleWithoutProxy() {
+        assertEquals("hdl scheme", "handle", handleParser.getHandleWithoutProxy("hdl:handle"));
+        assertEquals("global proxy", "handle", handleParser.getHandleWithoutProxy("http://hdl.handle.net/handle"));
+        assertEquals("no scheme or proxy", "handle", handleParser.getHandleWithoutProxy("handle"));
+        assertEquals("starts with slash", "handle", handleParser.getHandleWithoutProxy("/handle"));
+
+        assertEquals("hdl scheme", "1234/5678", handleParser.getHandleWithoutProxy("hdl:1234/5678"));
+        assertEquals("global proxy", "1234/5678", handleParser.getHandleWithoutProxy("http://hdl.handle.net/1234/5678"));
+        assertEquals("no scheme or proxy", "1234/5678", handleParser.getHandleWithoutProxy("1234/5678"));
+        assertEquals("starts with slash", "1234/5678", handleParser.getHandleWithoutProxy("/1234/5678"));
+    }
 }

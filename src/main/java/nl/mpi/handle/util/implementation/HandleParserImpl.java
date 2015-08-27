@@ -154,6 +154,22 @@ public class HandleParserImpl implements HandleParser, Serializable {
         
         return stripHandleIfPrefixIsKnown(handle);
     }
+
+    /**
+     * @see HandleParser#getHandleWithoutProxy(java.lang.String) 
+     */
+    @Override
+    public String getHandleWithoutProxy(String handleString) {
+        if(handleString.startsWith(completeHdlProxy)) {
+            return handleString.replace(completeHdlProxy, "");
+        } else if(handleString.startsWith(HandleConstants.HDL_LONG_PROXY)) {
+            return handleString.replace(HandleConstants.HDL_LONG_PROXY, "");
+        } else if(handleString.startsWith("/"))
+            return handleString.substring(1);
+        else {
+            return handleString;
+        }
+    }
     
     
     private boolean isHandlePrefixKnown(String handleString) {
@@ -165,19 +181,6 @@ public class HandleParserImpl implements HandleParser, Serializable {
         }
         
         return false;
-    }
-
-    
-    private String getHandleWithoutProxy(String handleString) {
-        if(handleString.startsWith(completeHdlProxy)) {
-            return handleString.replace(completeHdlProxy, "");
-        } else if(handleString.startsWith(HandleConstants.HDL_LONG_PROXY)) {
-            return handleString.replace(HandleConstants.HDL_LONG_PROXY, "");
-        } else if(handleString.startsWith("/"))
-            return handleString.substring(1);
-        else {
-            return handleString;
-        }
     }
     
     private boolean matchesHandlePattern(String handleString) {

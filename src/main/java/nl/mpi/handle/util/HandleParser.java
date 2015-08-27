@@ -87,4 +87,11 @@ public interface HandleParser {
      * @throws IllegalArgumentException if the handle is not valid and has an unknown prefix
      */
     public String stripAndValidateHandleIfPrefixIsKnown(URI handle);
+    
+    /**
+     * Removes the proxy or scheme from a handle string
+     * @param handleString a handle string, with or without scheme ("hdl:") or proxy ("http://hdl.handle.net/")
+     * @return the handle, without scheme or proxy; or the input string itself in case no schema or proxy was detected
+     */
+    public String getHandleWithoutProxy(String handleString);
 }
