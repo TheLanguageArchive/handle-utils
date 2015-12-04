@@ -639,6 +639,148 @@ public class HandleParserImplTest {
     }
     
     @Test
+    public void prepare_NoProxy_EmptyOrNullHandle() {
+        
+        URI emptyHandle = URI.create("");
+        String expectedExceptionMessage = "Invalid handle (" + emptyHandle + ")";
+        
+        // empty handle
+        
+        try {
+            handleParser.prepareAndValidateHandleWithoutProxy(emptyHandle);
+            fail("should have thrown an exception (empty handle - 2)");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+        
+        // null handle
+        
+        expectedExceptionMessage = "Invalid handle (" + null + ")";
+        
+        try {
+            handleParser.prepareAndValidateHandleWithoutProxy(null);
+            fail("should have thrown an exception (null handle - 2)");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void prepare_NoProxy_HandleContainingNoPrefix() {
+        
+        String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
+        URI initialHandle = URI.create(strippedHandle);
+        String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
+        
+        // without prefix
+        
+        try {
+            handleParser.prepareAndValidateHandleWithoutProxy(initialHandle);
+            fail("should have thrown an exception (no prefix - 2)");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+        
+        // with just a slash in the beginning
+        
+        initialHandle = URI.create("/" + strippedHandle);
+        expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
+        
+        try {
+            handleParser.prepareAndValidateHandleWithoutProxy(initialHandle);
+            fail("should have thrown an exception (slash - 2)");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void prepare_NoProxy_HandleContainingJustPrefix() {
+        
+        String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
+        URI initialHandle = URI.create(prefixWithSlash + strippedHandle);
+        URI expectedHandle = initialHandle;
+        
+        URI retrievedHandle = handleParser.prepareAndValidateHandleWithoutProxy(initialHandle);
+        
+        assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
+        
+        // with a different prefix
+        
+        initialHandle = URI.create(someOtherPrefixWithSlash + strippedHandle);
+        final String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
+        
+        try {
+            handleParser.prepareAndValidateHandleWithoutProxy(initialHandle);
+            fail("should have thrown an exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void prepare_NoProxy_HandleContainingHdlPrefix() {
+        
+        String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
+        URI initialHandle = URI.create(handleShortPrefix + strippedHandle);
+        URI expectedHandle = URI.create(prefixWithSlash + strippedHandle);
+        
+        URI retrievedHandle = handleParser.prepareAndValidateHandleWithoutProxy(initialHandle);
+        
+        assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
+        
+        // with a different prefix
+        
+        initialHandle = URI.create(handleSomeOtherShortPrefix + strippedHandle);
+        final String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
+        
+        try {
+            handleParser.prepareAndValidateHandleWithoutProxy(initialHandle);
+            fail("should have thrown an exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void prepare_NoProxy_HandleContainingFullPrefix() {
+        
+        String strippedHandle = "00-0A0A1B1B-2C2C-3D3D-4E4E-4E5FF5F6G7G9";
+        URI initialHandle = URI.create(handleLongPrefix + strippedHandle);
+        URI expectedHandle = URI.create(prefixWithSlash + strippedHandle);
+        
+        URI retrievedHandle = handleParser.prepareAndValidateHandleWithoutProxy(initialHandle);
+        
+        assertEquals("Retrieved handle different from expected (normal prefix)", expectedHandle, retrievedHandle);
+        
+        // with a different prefix
+        
+        initialHandle = URI.create(handleSomeOtherLongPrefix + strippedHandle);
+        final String expectedExceptionMessage = "Invalid handle (" + initialHandle + ")";
+        
+        try {
+            handleParser.prepareAndValidateHandleWithoutProxy(initialHandle);
+            fail("should have thrown an exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
+    public void prepare_NoProxy_NotAHandle() {
+        
+        URI notAHandle = URI.create("https://some/location/node.cmdi");
+        String expectedExceptionMessage = "Invalid handle (" + notAHandle + ")";
+        
+        try {
+            handleParser.prepareAndValidateHandleWithoutProxy(notAHandle);
+            fail("should have thrown an exception (not a handle - 2)");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception message different from expected", expectedExceptionMessage, ex.getMessage());
+        }
+    }
+    
+    @Test
     public void stripAndValidate_EmptyOrNullHandle() {
         
         // empty handle

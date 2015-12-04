@@ -80,6 +80,16 @@ public interface HandleParser {
     public URI prepareAndValidateHandleWithLongHdlPrefix(URI handleToPrepare);
     
     /**
+     * Removes the possible prefixes ("hdl:" or "http://hdl.handle.net/") from he given handle, if necessary.
+     * This method also makes sure the handle is valid and uses a known prefix.
+     * 
+     * @param handleToPrepare handle which may or may not have already the prefix
+     * @return handle with the appropriate prefix, or null if an empty or null handle is passed
+     * @throws IllegalArgumentException if the handle is not valid and has an unknown prefix
+     */
+    public URI prepareAndValidateHandleWithoutProxy(URI handleToPrepare);
+    
+    /**
      * Strips a handle of its prefixes.
      * If the prefix is unknown, it will be considered an invalid handle.
      * @param handle

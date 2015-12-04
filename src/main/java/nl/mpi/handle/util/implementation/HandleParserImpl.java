@@ -23,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * @see HandleParser
  * @author guisil
  */
 public class HandleParserImpl implements HandleParser, Serializable {
@@ -80,9 +80,6 @@ public class HandleParserImpl implements HandleParser, Serializable {
         
         logger.debug("Checking if handles '{}' and '{}' are equivalent", aHandleUri, anotherHandleUri);
 
-//        assureHandleIsValid(aHandleUri);
-//        assureHandleIsValid(anotherHandleUri);
-        
         String aStrippedHandle = stripAndValidateHandleIfPrefixIsKnown(aHandleUri);
         String anotherStrippedHandle = stripAndValidateHandleIfPrefixIsKnown(anotherHandleUri);
 
@@ -120,8 +117,6 @@ public class HandleParserImpl implements HandleParser, Serializable {
 
         logger.debug("Preparing (and validating) handle '{}' with hdl prefix", handleToPrepare);
         
-//        assureHandleIsValid(handleToPrepare);
-        
         String strippedHandle = stripAndValidateHandleIfPrefixIsKnown(handleToPrepare);
 
         return prepareHandle(strippedHandle, completeHdlPrefix, completeHdlProxy);
@@ -135,11 +130,22 @@ public class HandleParserImpl implements HandleParser, Serializable {
         
         logger.debug("Preparing (and validating) handle '{}' with long hdl prefix", handleToPrepare);
         
-//        assureHandleIsValid(handleToPrepare);
-        
         String strippedHandle = stripAndValidateHandleIfPrefixIsKnown(handleToPrepare);
         
         return prepareHandle(strippedHandle, completeLongHdlPrefix, completeLongHdlProxy);
+    }
+    
+    /**
+     * @see HandleParser#prepareAndValidateHandleWithoutProxy(java.net.URI)
+     */
+    @Override
+    public URI prepareAndValidateHandleWithoutProxy(URI handleToPrepare) {
+        
+        logger.debug("Preparing (and validating) handle '{}' without proxy", handleToPrepare);
+        
+        assureHandleIsValid(handleToPrepare);
+        
+        return URI.create(getHandleWithoutProxy(handleToPrepare.toString()));
     }
     
     /**

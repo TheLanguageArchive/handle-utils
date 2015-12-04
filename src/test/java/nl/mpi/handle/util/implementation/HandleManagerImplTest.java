@@ -20,10 +20,12 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.UUID;
 import net.handle.hdllib.HandleException;
 import net.handle.hdllib.HandleValue;
 import nl.mpi.handle.util.HandleInfoProvider;
+import nl.mpi.handle.util.HandleParser;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -58,6 +60,7 @@ public class HandleManagerImplTest {
     private final String prefix = "11142";
     
     private final HandleInfoProvider mockHandleInfoProvider = context.mock(HandleInfoProvider.class);
+    private final HandleParser mockHandleParser = context.mock(HandleParser.class);
     private final HandleUtil mockHandleUtil = context.mock(HandleUtil.class);
     
     @Mock File mockFile;
@@ -76,7 +79,7 @@ public class HandleManagerImplTest {
     
     @Before
     public void setUp() throws FileNotFoundException, IOException {
-        handleManager = new HandleManagerImpl(mockHandleInfoProvider, mockHandleUtil, prefix);
+        handleManager = new HandleManagerImpl(mockHandleInfoProvider, mockHandleParser, mockHandleUtil, prefix);
     }
     
     @After
@@ -161,6 +164,129 @@ public class HandleManagerImplTest {
         
         try {
             handleManager.assignNewHandle(mockFile, targetURI);
+            fail("should have thrown an exception");
+        } catch(IOException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void assignHandle_WithHdlProxy() throws HandleException, IOException, URISyntaxException {
+
+        final URI targetURI = URI.create("http://server/archive/target,cmdi");
+        final String uuidStr = UUID.randomUUID().toString().toUpperCase();
+        final String handleStr = prefix + "/00-" + uuidStr;
+        final URI handleUri = URI.create(handleStr);
+        final URI completeHandleUri = URI.create("hdl:" + handleStr);
+        
+        final HandleValue[] fakeHandleValues = {new HandleValue()};
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleParser).prepareAndValidateHandleWithoutProxy(completeHandleUri); will(returnValue(handleUri));
+            oneOf(mockHandleInfoProvider).createHandleInformation(mockFile, targetURI); will(returnValue(fakeHandleValues));
+            oneOf(mockHandleUtil).createHandle(handleStr, fakeHandleValues);
+        }});
+        
+        URI retrievedHandle = handleManager.assignHandle(mockFile, completeHandleUri, targetURI);
+        
+        assertEquals("Retrieved handle different from expected", handleUri, retrievedHandle);
+    }
+    
+    @Test
+    public void assignHandle_WithoutHdlProxy() throws HandleException, IOException, URISyntaxException {
+
+        final URI targetURI = URI.create("http://server/archive/target,cmdi");
+        final String uuidStr = UUID.randomUUID().toString().toUpperCase();
+        final String handleStr = prefix + "/00-" + uuidStr;
+        final URI handleUri = URI.create(handleStr);
+        
+        final HandleValue[] fakeHandleValues = {new HandleValue()};
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleParser).prepareAndValidateHandleWithoutProxy(handleUri); will(returnValue(handleUri));
+            oneOf(mockHandleInfoProvider).createHandleInformation(mockFile, targetURI); will(returnValue(fakeHandleValues));
+            oneOf(mockHandleUtil).createHandle(handleStr, fakeHandleValues);
+        }});
+        
+        URI retrievedHandle = handleManager.assignHandle(mockFile, handleUri, targetURI);
+        
+        assertEquals("Retrieved handle different from expected", handleUri, retrievedHandle);
+    }
+    
+    @Test
+    public void assignHandle_invalid() throws IOException, URISyntaxException, HandleException {
+        
+        final URI targetURI = URI.create("http://server/archive/target,cmdi");
+        final String handleStr = "http://12345";
+        final URI handleUri = URI.create(handleStr);
+        
+        final IllegalArgumentException expectedException = new IllegalArgumentException("Invalid handle (" + handleStr + ")");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleParser).prepareAndValidateHandleWithoutProxy(handleUri); will(throwException(expectedException));
+        }});
+        
+        try {
+            handleManager.assignHandle(mockFile, handleUri, targetURI);
+            fail("should have thrown exception");
+        } catch(IllegalArgumentException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void assignHandleThrowsHandleException() throws HandleException, IOException, URISyntaxException {
+
+        final URI targetURI = URI.create("http://server/archive/target,cmdi");
+        final String uuidStr = UUID.randomUUID().toString().toUpperCase();
+        final String handleStr = prefix + "/00-" + uuidStr;
+        final URI handleUri = URI.create(handleStr);
+        final URI completeHandleUri = URI.create("hdl:" + handleStr);
+        
+        final HandleValue[] fakeHandleValues = {new HandleValue()};
+        
+        final HandleException expectedException = new HandleException(1, "some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleParser).prepareAndValidateHandleWithoutProxy(completeHandleUri); will(returnValue(handleUri));
+            oneOf(mockHandleInfoProvider).createHandleInformation(mockFile, targetURI); will(returnValue(fakeHandleValues));
+            oneOf(mockHandleUtil).createHandle(handleStr, fakeHandleValues); will(throwException(expectedException));
+        }});
+        
+        try {
+            handleManager.assignHandle(mockFile, completeHandleUri, targetURI);
+            fail("should have thrown an exception");
+        } catch(HandleException ex) {
+            assertEquals("Exception different from expected", expectedException, ex);
+        }
+    }
+    
+    @Test
+    public void assignHandleThrowsIOException() throws HandleException, IOException, URISyntaxException {
+
+        final URI targetURI = URI.create("http://server/archive/target,cmdi");
+        final String uuidStr = UUID.randomUUID().toString().toUpperCase();
+        final String handleStr = prefix + "/00-" + uuidStr;
+        final URI handleUri = URI.create(handleStr);
+        final URI completeHandleUri = URI.create("hdl:" + handleStr);
+        
+        final HandleValue[] fakeHandleValues = {new HandleValue()};
+        
+        final IOException expectedException = new IOException("some exception message");
+        
+        context.checking(new Expectations() {{
+            
+            oneOf(mockHandleParser).prepareAndValidateHandleWithoutProxy(completeHandleUri); will(returnValue(handleUri));
+            oneOf(mockHandleInfoProvider).createHandleInformation(mockFile, targetURI); will(returnValue(fakeHandleValues));
+            oneOf(mockHandleUtil).createHandle(handleStr, fakeHandleValues); will(throwException(expectedException));
+        }});
+        
+        try {
+            handleManager.assignHandle(mockFile, completeHandleUri, targetURI);
             fail("should have thrown an exception");
         } catch(IOException ex) {
             assertEquals("Exception different from expected", expectedException, ex);

@@ -19,24 +19,31 @@ package nl.mpi.handle.util;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import net.handle.hdllib.HandleException;
 
 /**
- * Class containing some useful operations related with handles
+ * Class containing some useful operations related with handles.
  * @author guisil
  */
 public interface HandleManager {
     
     /**
      * Generates a handle and associated information, and assigns it to the
-     * target URI
-     * 
+     * target URI.
      * @param file current location of the file to which the handle should be assigned
      * @param targetURI final URI of the file, which the handle should target
      * @return URI corresponding to the handle, with the appropriate prefix
      */
-    public URI assignNewHandle(File file, URI targetURI) throws HandleException, IOException, URISyntaxException;
+    public URI assignNewHandle(File file, URI targetURI) throws HandleException, IOException;
+    
+    /**
+     * Assigns the given handle, if valid, to the target URI.
+     * @param file current location of the file to which the handle should be assigned
+     * @param handle handle to assign
+     * @param targetURI final URL of the file, which the handle should target
+     * @return URI corresponding to the handle, with the appropriate prefix
+     */
+    public URI assignHandle(File file, URI handle, URI targetURI) throws HandleException, IOException;
     
     /**
      * Updates the target of the given handle.
@@ -47,7 +54,7 @@ public interface HandleManager {
     public void updateHandle(File file, URI handle, URI newTarget) throws HandleException, IOException;
     
     /**
-     * Deletes the given handle
+     * Deletes the given handle.
      * @param handle handle to be deleted
      */
     public void deleteHandle(URI handle) throws HandleException, IOException;

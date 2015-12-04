@@ -25,6 +25,7 @@ import net.handle.hdllib.HandleException;
 import net.handle.hdllib.HandleValue;
 import nl.mpi.handle.util.HandleInfoProvider;
 import nl.mpi.handle.util.HandleManager;
+import nl.mpi.handle.util.HandleParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,12 +38,14 @@ public class HandleManagerImpl implements HandleManager, Serializable {
     private static final Logger logger = LoggerFactory.getLogger(HandleManagerImpl.class);
     
     private final HandleInfoProvider handleInfoProvider;
+    private final HandleParser handleParser;
     private final HandleUtil handleUtil;
     
-    public HandleManagerImpl(HandleInfoProvider hdlInfoRetriever, HandleUtil hdlUtil, String prefix)
+    public HandleManagerImpl(HandleInfoProvider hdlInfoProvider, HandleParser hdlParser, HandleUtil hdlUtil, String prefix)
             throws FileNotFoundException, IOException {
 
-        this.handleInfoProvider = hdlInfoRetriever;
+        this.handleInfoProvider = hdlInfoProvider;
+        this.handleParser = hdlParser;
         this.handleUtil = hdlUtil;
     }
 
@@ -57,15 +60,33 @@ public class HandleManagerImpl implements HandleManager, Serializable {
         
         String generatedHandle = handleInfoProvider.generateUuidHandle();
         
+        return assignHandle(file, generatedHandle, targetURI);
+    }
+
+    /**
+     * @see HandleManager#assignHandle(java.io.File, java.net.URI, java.net.URI)
+     */
+    @Override
+    public URI assignHandle(File file, URI handle, URI targetURI) throws HandleException, IOException {
+        
+        URI preparedHandle = handleParser.prepareAndValidateHandleWithoutProxy(handle);
+        
+        return assignHandle(file, preparedHandle.toString(), targetURI);
+    }
+    
+    private URI assignHandle(File file, String handleStr, URI targetURI) throws HandleException, IOException {
+        
+        logger.debug("Assigning handle '{}', with target '{}', to file '{}'", handleStr, targetURI, file);
+        
         HandleValue[] handleInformation = handleInfoProvider.createHandleInformation(file, targetURI);
         
-        handleUtil.createHandle(generatedHandle, handleInformation);
+        handleUtil.createHandle(handleStr, handleInformation);
         
-        URI generatedHandleURI = URI.create(generatedHandle);
+        URI generatedHandleURI = URI.create(handleStr);
         logger.debug("Generated handle - {} - was successfully created", generatedHandleURI);
         return generatedHandleURI;
     }
-
+    
     /**
      * @see HandleManager#updateHandle(java.io.File, java.net.URI, java.net.URI)
      */
