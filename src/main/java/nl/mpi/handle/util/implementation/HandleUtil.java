@@ -7,19 +7,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.io.Serializable;
-import java.util.Properties;
 import net.handle.api.HSAdapter;
 import net.handle.api.HSAdapterFactory;
 import net.handle.hdllib.HandleException;
-import net.handle.hdllib.HandleResolver;
 import net.handle.hdllib.HandleValue;
-import net.handle.hdllib.Resolver;
 import org.apache.commons.io.IOUtils;
-//import nl.mpi.cmdihandleassigner.CMDIHandleAssigner;
 
 /**
  * This class was adapted. The original description follows.
- * @author Guilherme Silva <guilherme.silva@mpi.nl>
+ * @author guisil
  * 
  * This utility provides methods for interacting with the Handle System. It provides simplified functionality to the Handle System api developed by CNRI tailored to the needs of the ADL Registry website.
  * @author Jacob Marks - Joint ADL Co-Lab
@@ -36,7 +32,7 @@ public class HandleUtil implements Serializable
     /**
      * The index of an ADL Registry user HS_SECKEY attribute within a user handle.
      */
-    private static int CONTRIBUTOR_PRIVATE_KEY_INDEX = 301;
+    private static final int CONTRIBUTOR_PRIVATE_KEY_INDEX = 301;
     
     public HandleUtil(String adminKeyFilePath, String adminUserHandleIndex, String adminUserHandle, String adminPassword) {
         
@@ -290,15 +286,12 @@ public class HandleUtil implements Serializable
     
     public byte[] getPrivateKeyFileAsStream() throws IOException {
         
-        byte[] fileBytes = null;
+        byte[] fileBytes;
         
-//        InputStream privKeyInputStream = HandleUtil.class.getClassLoader().getResourceAsStream(handleAdminKeyFilePath);
-        
-        // now using an absolute path
-        InputStream privKeyInputStream = new FileInputStream(handleAdminKeyFilePath);
-
-        fileBytes = IOUtils.toByteArray(privKeyInputStream);
-        privKeyInputStream.close();
+        try ( // now using an absolute path
+                InputStream privKeyInputStream = new FileInputStream(handleAdminKeyFilePath)) {
+            fileBytes = IOUtils.toByteArray(privKeyInputStream);
+        }
         
         return fileBytes;
     }
@@ -335,10 +328,7 @@ public class HandleUtil implements Serializable
         
         HandleValue[] values = resolveHandle(iHandle, null, null, iApi);
         
-        for (int i = 0; i < values.length; i++)
-        {
-            HandleValue value = values[i];
-            
+        for (HandleValue value : values) {
             if (value.getIndex() == HandleUtil.CONTRIBUTOR_PRIVATE_KEY_INDEX)
             {
                 key = value;

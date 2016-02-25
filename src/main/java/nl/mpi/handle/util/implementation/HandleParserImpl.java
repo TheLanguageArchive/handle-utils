@@ -170,8 +170,9 @@ public class HandleParserImpl implements HandleParser, Serializable {
             return handleString.replace(completeHdlProxy, "");
         } else if(handleString.startsWith(HandleConstants.HDL_LONG_PROXY)) {
             return handleString.replace(HandleConstants.HDL_LONG_PROXY, "");
-        } else if(handleString.startsWith("/"))
+        } else if(handleString.startsWith("/")) {
             return handleString.substring(1);
+        }
         else {
             return handleString;
         }

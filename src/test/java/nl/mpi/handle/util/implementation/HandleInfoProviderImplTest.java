@@ -125,8 +125,6 @@ public class HandleInfoProviderImplTest {
                     assertEquals("Array data in position " + i + " different from expected", expectedArrayData[i], Util.decodeString(retrievedHandleValues[i].getData()));
                 }
             }
-            
-            //TODO not checking last position - how should it be matched?
         }
     }
     
@@ -162,8 +160,6 @@ public class HandleInfoProviderImplTest {
                     assertEquals("Array data in position " + i + " different from expected", expectedArrayData[i], Util.decodeString(retrievedHandleValues[i].getData()));
                 }
             }
-            
-            //TODO not checking last position - how should it be matched?
         }
     }
 
